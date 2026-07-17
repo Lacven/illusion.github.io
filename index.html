@@ -803,20 +803,28 @@
         }
 
         // ВХОД ЧЕРЕЗ GOOGLE
-        window.signInWithGoogle = async function() {
-            try {
-                const result = await signInWithPopup(auth, googleProvider);
-                showToast(`Добро пожаловать, ${result.user.displayName}!`, "success");
-                closeAuthModal();
-            } catch (error) {
-                console.error(error);
-                if (error.code === 'auth/popup-blocked') {
-                    showToast("Окно заблокировано браузером! Разрешите всплывающие окна для сайта.", "error");
-                } else {
-                    showToast("Не удалось войти через Google.", "error");
-                }
-            }
+// ВХОД ЧЕРЕЗ GOOGLE С ИСПРАВЛЕННЫМ ВЫВОДОМ ОШИБОК
+window.signInWithGoogle = async function() {
+    try {
+        const result = await signInWithPopup(auth, googleProvider);
+        showToast(`Добро пожаловать, ${result.user.displayName}!`, "success");
+        closeAuthModal();
+    } catch (error) {
+        console.error(error);
+        // Выводим точную причину прямо на экран мобильного
+        if (error.code === 'auth/popup-blocked') {
+            showToast("Окно заблокировано браузером! Разрешите всплывающие окна.", "error");
+        } else if (error.code === 'auth/operation-not-allowed') {
+            showToast("Ошибка: Google-вход не активирован в Firebase (нажми Save!)", "error");
+        } else if (error.code === 'auth/unauthorized-domain') {
+            showToast("Ошибка: Этот домен не добавлен в Authorized Domains в Firebase!", "error");
+        } else {
+            // Если ошибка какая-то другая, выводим её системное имя
+            showToast(`Ошибка: ${error.code || error.message}`, "error");
         }
+    }
+}
+
 
         // РЕГИСТРАЦИЯ
         window.startRegistration = async function() {
