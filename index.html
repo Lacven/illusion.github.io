@@ -732,88 +732,62 @@
         </div>
     </footer>
 
-    <!-- Скрипты взаимодействия -->
-    <script>
-        const DB_CONFIG = {
-            host: '4bggl1.h.filess.io',
-            user: 'Illusionsitedata_footcamera',
-            database: 'Illusionsitedata_footcamera',
-            port: 3307,
-            password: '5786a25e1d4adea76cfcbaa037b38173f777f426'
-        };
+    <!-- Подключаем Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Функция показа премиум уведомлений (Toasts) вместо алертов
+        // ВСТАВЬ СВОИ ДАННЫЕ ИЗ КОНСОЛИ FIREBASE СЮДА:
+        const firebaseConfig = {
+  apiKey: "AIzaSyDCLPh1Gcxe97UUxiLZFB-CrSnZd24y0Bs",
+  authDomain: "illusion-stacks.firebaseapp.com",
+  projectId: "illusion-stacks",
+  storageBucket: "illusion-stacks.firebasestorage.app",
+  messagingSenderId: "475141325383",
+  appId: "1:475141325383:web:f159aa59ff385f6ce5a762"
+};
+
+        // Инициализируем Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Функция показа уведомлений (Toasts)
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
-            
-            // Создаем плашку уведомления
             const toast = document.createElement('div');
             toast.className = `toast ${type === 'error' ? 'toast-error' : 'toast-success'}`;
             toast.innerText = message;
-            
             container.appendChild(toast);
-            
-            // Плавное удаление через 3.5 секунды
             setTimeout(() => {
                 toast.classList.add('hide');
-                setTimeout(() => {
-                    toast.remove();
-                }, 400); // Ожидаем завершения CSS-анимации скрытия
+                setTimeout(() => { toast.remove(); }, 400);
             }, 3500);
         }
 
-        // Запросы напрямую в SQL через веб-шлюз
-        async function runSQL(query) {
-            const url = `https://sql.filess.io/query?host=${DB_CONFIG.host}&port=${DB_CONFIG.port}&user=${DB_CONFIG.user}&password=${DB_CONFIG.password}&database=${DB_CONFIG.database}&query=${encodeURIComponent(query)}`;
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    const errText = await response.text();
-                    console.error("Ошибка сервера filess.io:", errText);
-                    return null;
-                }
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error("Ошибка SQL запроса:", error);
-                return null;
-            }
-        }
-
-        // Авто-создание структуры таблиц при первом открытии
-        async function initDatabase() {
-            const createTableQuery = `
-                CREATE TABLE IF NOT EXISTS users (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    username VARCHAR(50) NOT NULL UNIQUE,
-                    password VARCHAR(255) NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-            `;
-            await runSQL(createTableQuery);
-        }
-
-        // Проверяем статус входа
-        document.addEventListener("DOMContentLoaded", () => {
-            initDatabase();
-            const savedUser = localStorage.getItem('username');
-            if (savedUser) {
-                document.getElementById('navAuthBtn').innerText = savedUser;
-                document.getElementById('navAuthBtn').onclick = () => {
+        // Следим за тем, вошел пользователь или нет
+        onAuthStateChanged(auth, (user) => {
+            const navBtn = document.getElementById('navAuthBtn');
+            if (user) {
+                // Если вошел, показываем его Email (или имя до @)
+                const username = user.email.split('@')[0];
+                navBtn.innerText = username;
+                navBtn.onclick = () => {
                     if(confirm("Вы хотите выйти из аккаунта?")) {
-                        localStorage.removeItem('username');
-                        showToast("Вы успешно вышли из аккаунта.", "success");
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1000);
+                        signOut(auth).then(() => {
+                            showToast("Вы успешно вышли.", "success");
+                        });
                     }
                 };
+            } else {
+                // Если не вошел
+                navBtn.innerText = "Войти";
+                navBtn.onclick = openAuthModal;
             }
         });
 
-        function handleBuyClick() {
-            const savedUser = localStorage.getItem('username');
-            if (!savedUser) {
+        // Кнопка покупки
+        window.handleBuyClick = function() {
+            if (!auth.currentUser) {
                 showToast('Пожалуйста, авторизуйтесь для покупки', 'error');
                 openAuthModal();
             } else {
@@ -821,127 +795,76 @@
             }
         }
 
-        // Мгновенная регистрация в БД (с исправленной проверкой ответа)
-        async function startRegistration() {
-            const username = document.getElementById('regLogin').value.trim();
+        // РЕГИСТРАЦИЯ
+        window.startRegistration = async function() {
+            const loginVal = document.getElementById('regLogin').value.trim();
             const password = document.getElementById('regPassword').value.trim();
 
-            if (!username || !password) {
-                showToast("Заполните все поля регистрации!", "error");
+            if (!loginVal || !password) {
+                showToast("Заполните все поля!", "error");
                 return;
             }
 
-            // Проверяем, не занят ли логин в БД
-            const checkQuery = `SELECT id FROM users WHERE username='${username}'`;
-            const checkResult = await runSQL(checkQuery);
-            
-            if (checkResult === null) {
-                showToast("Ошибка подключения к базе данных. Попробуйте позже.", "error");
-                return;
-            }
+            // Firebase требует email, поэтому если пользователь ввел просто логин,
+            // мы незаметно превращаем его в email вид: login@mysite.com
+            const email = loginVal.includes('@') ? loginVal : `${loginVal}@mysite.com`;
 
-            if (Array.isArray(checkResult) && checkResult.length > 0) {
-                showToast("Этот логин уже зарегистрирован!", "error");
-                return;
-            }
-
-            // Запись напрямую в БД
-            const insertQuery = `INSERT INTO users (username, password) VALUES ('${username}', '${password}')`;
-            const result = await runSQL(insertQuery);
-
-            // filess.io при успешном INSERT возвращает объект со свойствами вроде affectedRows или insertId
-            if (result && (result.affectedRows > 0 || result.insertId || typeof result === 'object')) {
-                showToast("Регистрация успешно завершена!", "success");
-                localStorage.setItem('username', username);
-                setTimeout(() => {
-                    location.reload();
-                }, 1500);
-            } else {
-                showToast("Ошибка базы данных при регистрации.", "error");
-                console.log("Ответ от БД при ошибке регистрации:", result);
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showToast("Регистрация успешна!", "success");
+                closeRegModal();
+            } catch (error) {
+                console.error(error);
+                if (error.code === 'auth/email-already-in-use') {
+                    showToast("Этот логин уже занят!", "error");
+                } else if (error.code === 'auth/weak-password') {
+                    showToast("Пароль должен быть минимум 6 символов!", "error");
+                } else {
+                    showToast("Ошибка регистрации. Попробуйте еще раз.", "error");
+                }
             }
         }
 
-        // Авторизация пользователя
-        async function submitAuth() {
+        // АВТОРИЗАЦИЯ (ВХОД)
+        window.submitAuth = async function() {
             const loginVal = document.getElementById('authLogin').value.trim();
-            const passVal = document.getElementById('authPassword').value.trim();
+            const password = document.getElementById('authPassword').value.trim();
 
-            if (!loginVal || !passVal) {
+            if (!loginVal || !password) {
                 showToast("Введите логин и пароль!", "error");
                 return;
             }
 
-            const query = `SELECT username FROM users WHERE username='${loginVal}' AND password='${passVal}'`;
-            const result = await runSQL(query);
+            const email = loginVal.includes('@') ? loginVal : `${loginVal}@mysite.com`;
 
-            if (result && Array.isArray(result) && result.length > 0) {
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
                 showToast("Успешный вход в систему!", "success");
-                localStorage.setItem('username', result[0].username);
-                setTimeout(() => {
-                    location.reload();
-                }, 1500);
-            } else {
+                closeAuthModal();
+            } catch (error) {
                 showToast("Неверный логин или пароль!", "error");
             }
         }
 
-        // Элементы интерфейса модалок и слайдера
+        // Модалки
         const modal = document.getElementById('detailsModal');
         const authModal = document.getElementById('authModal');
         const regModal = document.getElementById('regModal');
         const track = document.getElementById('sliderTrack');
         let currentSlide = 0;
 
-        function openModal() {
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            updateSliderPosition();
-        }
+        window.openModal = () => { modal.classList.add('active'); document.body.style.overflow = 'hidden'; updateSliderPosition(); }
+        window.closeModal = () => { modal.classList.remove('active'); document.body.style.overflow = 'auto'; }
+        window.openAuthModal = () => { closeModal(); closeRegModal(); authModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+        window.closeAuthModal = () => { authModal.classList.remove('active'); document.body.style.overflow = 'auto'; }
+        window.openRegModal = () => { closeModal(); closeAuthModal(); regModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+        window.closeRegModal = () => { regModal.classList.remove('active'); document.body.style.overflow = 'auto'; }
+        window.switchToReg = () => { openRegModal(); }
+        window.switchToAuth = () => { openAuthModal(); }
+        window.moveSlide = (direction) => { currentSlide = (currentSlide + direction + 4) % 4; updateSliderPosition(); }
+        function updateSliderPosition() { track.style.transform = `translateX(-${currentSlide * 100}%)`; }
 
-        function closeModal() {
-            modal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
-        function openAuthModal() {
-            closeModal();
-            closeRegModal();
-            authModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeAuthModal() {
-            authModal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
-        function openRegModal() {
-            closeModal();
-            closeAuthModal();
-            regModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeRegModal() {
-            regModal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
-        function switchToReg() { openRegModal(); }
-        function switchToAuth() { openAuthModal(); }
-
-        function moveSlide(direction) {
-            const slidesCount = 4;
-            currentSlide = (currentSlide + direction + slidesCount) % slidesCount;
-            updateSliderPosition();
-        }
-
-        function updateSliderPosition() {
-            track.style.transform = `translateX(-${currentSlide * 100}%)`;
-        }
-
-        window.addEventListener('click', function(e) {
+        window.addEventListener('click', (e) => {
             if(e.target === modal) closeModal();
             if(e.target === authModal) closeAuthModal();
             if(e.target === regModal) closeRegModal();
