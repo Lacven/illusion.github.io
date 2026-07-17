@@ -172,6 +172,21 @@
             transform: translateY(-2px);
         }
 
+        .btn-success-outline {
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            text-align: center;
+            display: inline-block;
+            width: 100%;
+        }
+        .btn-success-outline:hover {
+            background: #10b981;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+            transform: translateY(-2px);
+        }
+
         .btn-text {
             background: transparent;
             border: none;
@@ -585,6 +600,18 @@
             background: rgba(255,255,255,0.1);
             font-weight: 600;
         }
+        .key-box {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            letter-spacing: 1px;
+            font-size: 1rem;
+            margin-top: 5px;
+            user-select: all;
+        }
 
         /* Подвал */
         footer {
@@ -703,17 +730,30 @@
     <section class="section">
         <h2 class="section-title">Тарифы</h2>
         <div class="pricing-grid">
+            <!-- Товар 1: PRO -->
             <div class="price-card">
                 <div>
                     <div class="price-title">ILLUSION PRO</div>
                     <div class="price-value">500 ₽</div>
                 </div>
                 <div class="price-actions">
-                    <button class="btn btn-white" onclick="handleBuyClick()">Купить</button>
+                    <button class="btn btn-white" onclick="handleBuyClick('PRO')">Купить</button>
                     <button class="btn btn-outline" onclick="openModal()">Подробнее</button>
                 </div>
             </div>
 
+            <!-- Товар 2: СБРОС HWID (Новый) -->
+            <div class="price-card">
+                <div>
+                    <div class="price-title">СБРОС HWID</div>
+                    <div class="price-value">150 ₽</div>
+                </div>
+                <div class="price-actions">
+                    <button class="btn btn-white" onclick="handleBuyClick('HWID')">Купить сброс</button>
+                </div>
+            </div>
+            
+            <!-- Товар 3: MAX (In Dev) -->
             <div class="price-card disabled">
                 <span class="badge">In Dev</span>
                 <div>
@@ -727,7 +767,7 @@
         </div>
     </section>
 
-    <!-- Подробное модальное окно -->
+    <!-- Подробное модальное окно (Карточка товара) -->
     <div class="modal" id="detailsModal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -769,10 +809,10 @@
 
                 <div class="contacts-block">
                     <div style="font-weight: 600; color: #666;">КОММУНИКАЦИЯ И РЕСУРСЫ</div>
+                    <!-- Обновленные ссылки на Обзор и Отзывы -->
                     <div class="contacts-grid">
-                        <span>Заказ: <a href="https://t.me/meksi12" class="link-accent">@meksi12</a>, <a href="https://t.me/Lacven" class="link-accent">@Lacven</a></span>
-                        <span><a href="#" class="link-accent" onclick="showToast('Переход к отзывам...', 'success')">Отзывы клиентов</a></span>
-                        <span><a href="#" class="link-accent" onclick="showToast('Переход к видеообзору...', 'success')">Видеообзор</a></span>
+                        <span><a href="https://www.youtube.com/watch?v=mNyR2cUbzvw" target="_blank" class="link-accent">Смотреть обзор (YouTube)</a></span>
+                        <span><a href="https://t.me/illusionstacks" target="_blank" class="link-accent">Читать отзывы (Telegram)</a></span>
                     </div>
                 </div>
             </div>
@@ -801,6 +841,21 @@
 
                 <!-- Основная инфа: Настройки и вещи -->
                 <div class="profile-main-content">
+                    
+                    <!-- Блок: Лицензия и Доступ (Появляется после покупки) -->
+                    <div id="licenseBlock" style="display: none; margin-bottom: 10px;">
+                        <div style="font-weight: 800; font-size: 0.85rem; letter-spacing: 1px; color: #666; margin-bottom: 10px; text-transform: uppercase;">Лицензия и Доступ</div>
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label>Ваш лицензионный ключ</label>
+                            <div id="profileKey" class="key-box">Ключ не найден</div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <p style="font-size: 0.9rem; color: #aaa;">Статус HWID: <span id="hwidStatus" style="font-weight: 600; padding: 2px 8px; border-radius: 4px;">...</span></p>
+                        </div>
+                        <!-- Кнопка в приватную группу -->
+                        <a href="https://t.me/+8HSwBraF0FJjOGUy" target="_blank" class="btn btn-success-outline">Вступить в приватную группу (Файлы)</a>
+                    </div>
+
                     <div>
                         <div style="font-weight: 800; font-size: 0.85rem; letter-spacing: 1px; color: #666; margin-bottom: 15px; text-transform: uppercase;">Настройки аккаунта</div>
                         
@@ -926,6 +981,36 @@
 
         const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23222'/><circle cx='50' cy='35' r='18' fill='%23888'/><path d='M15 85 C15 60, 85 60, 85 85' fill='%23888'/></svg>";
 
+        // Экспорт функций в глобальную область, чтобы работали onlick
+        window.showToast = showToast;
+        window.openModal = () => { document.getElementById('detailsModal').classList.add('active'); document.body.style.overflow = 'hidden'; updateSliderPosition(); }
+        window.closeModal = () => { document.getElementById('detailsModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
+        window.openAuthModal = () => { window.closeModal(); window.closeRegModal(); window.closeProfileModal(); document.getElementById('authModal').classList.add('active'); document.body.style.overflow = 'hidden'; }
+        window.closeAuthModal = () => { document.getElementById('authModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
+        window.openRegModal = () => { window.closeModal(); window.closeAuthModal(); window.closeProfileModal(); document.getElementById('regModal').classList.add('active'); document.body.style.overflow = 'hidden'; }
+        window.closeRegModal = () => { document.getElementById('regModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
+        window.openProfileModal = async () => { 
+            window.closeModal(); window.closeAuthModal(); window.closeRegModal(); 
+            if(auth.currentUser) {
+                const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+                renderProfileModalData(snap.data());
+            }
+            document.getElementById('profileModal').classList.add('active'); 
+            document.body.style.overflow = 'hidden'; 
+        }
+        window.closeProfileModal = () => { document.getElementById('profileModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
+        window.switchToReg = () => { window.openRegModal(); }
+        window.switchToAuth = () => { window.openAuthModal(); }
+
+        let currentSlide = 0;
+        window.moveSlide = (direction) => { 
+            currentSlide = (currentSlide + direction + 4) % 4; 
+            updateSliderPosition(); 
+        }
+        function updateSliderPosition() { 
+            document.getElementById('sliderTrack').style.transform = `translateX(-${currentSlide * 100}%)`; 
+        }
+
         // Уведомления
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -939,7 +1024,7 @@
             }, 3500);
         }
 
-        // Проверка и инициализация данных юзера в Firestore
+        // Проверка и инициализация данных юзера в Firestore (С ДОБАВЛЕНИЕМ НОВЫХ ПОЛЕЙ HWID И KEY)
         async function syncUserData(user) {
             const userRef = doc(db, "users", user.uid);
             const userSnap = await getDoc(userRef);
@@ -948,15 +1033,17 @@
             let baseAvatar = user.photoURL || defaultAvatar;
 
             if (!userSnap.exists()) {
-                // Если юзера нет в БД, создаем стартовую анкету
-                await setDoc(userRef, {
+                const newData = {
                     uid: user.uid,
                     username: baseName,
                     avatarUrl: baseAvatar,
                     balance: 0,
-                    items: []
-                });
-                return { username: baseName, avatarUrl: baseAvatar, balance: 0, items: [] };
+                    items: [],
+                    hwidLinked: false, // Изначально не привязан
+                    userKey: ""        // Пустой ключ до покупки
+                };
+                await setDoc(userRef, newData);
+                return newData;
             } else {
                 return userSnap.data();
             }
@@ -984,11 +1071,35 @@
             document.getElementById('profileBalance').innerText = `${userData.balance} ₽`;
             document.getElementById('profileNameInput').value = userData.username;
 
-            // Показываем/скрываем смену пароля (только для зашедших по логину/паролю)
+            // Показываем/скрываем смену пароля
             const isGoogle = auth.currentUser.providerData.some(p => p.providerId === 'google.com');
             document.getElementById('passwordChangeBlock').style.display = isGoogle ? 'none' : 'block';
 
-            // Выводим товары
+            // Проверка купленных товаров
+            const hasPro = userData.items && userData.items.some(item => item.name === "ILLUSION PRO");
+            const licenseBlock = document.getElementById('licenseBlock');
+            
+            if (hasPro) {
+                licenseBlock.style.display = 'block';
+                // Отображение ключа
+                document.getElementById('profileKey').innerText = userData.userKey || "Ключ генерируется...";
+                
+                // Статус HWID
+                const hwidEl = document.getElementById('hwidStatus');
+                if (userData.hwidLinked) {
+                    hwidEl.innerText = "ПРИВЯЗАН";
+                    hwidEl.style.background = "rgba(239, 68, 68, 0.2)";
+                    hwidEl.style.color = "#ef4444";
+                } else {
+                    hwidEl.innerText = "НЕ ПРИВЯЗАН";
+                    hwidEl.style.background = "rgba(16, 185, 129, 0.2)";
+                    hwidEl.style.color = "#10b981";
+                }
+            } else {
+                licenseBlock.style.display = 'none';
+            }
+
+            // Выводим список товаров
             const itemsList = document.getElementById('profileItemsList');
             if (userData.items && userData.items.length > 0) {
                 itemsList.innerHTML = userData.items.map(item => `
@@ -1007,7 +1118,9 @@
             if (user) {
                 const data = await syncUserData(user);
                 renderHeaderBlock(data);
-                renderProfileModalData(data);
+                if(document.getElementById('profileModal').classList.contains('active')) {
+                    renderProfileModalData(data);
+                }
             } else {
                 renderHeaderBlock(null);
             }
@@ -1022,8 +1135,6 @@
                 await updateProfile(auth.currentUser, { displayName: newName });
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { username: newName });
                 showToast("Никнейм успешно изменен!", "success");
-                
-                // Перерисовываем
                 const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
                 renderHeaderBlock(snap.data());
             } catch(e) { showToast("Ошибка обновления ника", "error"); }
@@ -1040,7 +1151,6 @@
                 await updateProfile(auth.currentUser, { photoURL: url });
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { avatarUrl: url });
                 showToast("Аватар обновлен!", "success");
-
                 document.getElementById('profileMainAvatar').src = url;
                 const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
                 renderHeaderBlock(snap.data());
@@ -1065,38 +1175,70 @@
         window.logOut = function() {
             if(confirm("Вы уверены, что хотите выйти?")) {
                 signOut(auth).then(() => {
-                    closeProfileModal();
+                    window.closeProfileModal();
                     showToast("Вы вышли из системы.", "success");
                 });
             }
         }
 
-        // Купить товар
-        window.handleBuyClick = async function() {
+        // КУПИТЬ ТОВАР (PRO или СБРОС HWID)
+        window.handleBuyClick = async function(productType) {
             if (!auth.currentUser) {
                 showToast('Пожалуйста, авторизуйтесь для покупки', 'error');
-                openAuthModal();
+                window.openAuthModal();
                 return;
             }
 
-            // Эмуляция покупки: проверяем баланс юзера в Firestore
             const ref = doc(db, "users", auth.currentUser.uid);
             const snap = await getDoc(ref);
             const data = snap.data();
 
-            if (data.balance >= 500) {
-                let currentItems = data.items || [];
-                currentItems.push({ name: "ILLUSION PRO", status: "Активна" });
+            if (productType === 'HWID') {
+                // ЛОГИКА ПОКУПКИ СБРОСА HWID
+                if (!data.hwidLinked) {
+                    return showToast('Ваш HWID не привязан, сброс не требуется!', 'error');
+                }
                 
-                await updateDoc(ref, {
-                    balance: data.balance - 500,
-                    items: currentItems
-                });
+                if (data.balance >= 150) {
+                    await updateDoc(ref, {
+                        balance: data.balance - 150,
+                        hwidLinked: false
+                    });
+                    showToast('HWID успешно сброшен!', 'success');
+                    // Перерисовываем профиль если открыт
+                    const updatedSnap = await getDoc(ref);
+                    renderProfileModalData(updatedSnap.data());
+                } else {
+                    showToast('Недостаточно средств (Нужно 150 ₽)', 'error');
+                }
 
-                showToast("Успешная покупка тарифа ILLUSION PRO!", "success");
-                renderProfileModalData({ ...data, balance: data.balance - 500, items: currentItems });
-            } else {
-                showToast('Недостаточно средств. Платежный шлюз настраивается.', 'error');
+            } else if (productType === 'PRO') {
+                // ЛОГИКА ПОКУПКИ ILLUSION PRO
+                if (data.balance >= 500) {
+                    let currentItems = data.items || [];
+                    const alreadyHasPro = currentItems.some(i => i.name === "ILLUSION PRO");
+                    
+                    if (alreadyHasPro) {
+                        return showToast('У вас уже приобретен ILLUSION PRO!', 'error');
+                    }
+
+                    currentItems.push({ name: "ILLUSION PRO", status: "Активна" });
+                    
+                    // Генерируем тестовый ключ для базы данных (чтобы отобразился в профиле)
+                    const generatedKey = "ILLUSION-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+                    
+                    await updateDoc(ref, {
+                        balance: data.balance - 500,
+                        items: currentItems,
+                        userKey: generatedKey
+                    });
+
+                    showToast("Успешная покупка тарифа ILLUSION PRO!", "success");
+                    const updatedSnap = await getDoc(ref);
+                    renderProfileModalData(updatedSnap.data());
+                } else {
+                    showToast('Недостаточно средств. Платежный шлюз настраивается.', 'error');
+                }
             }
         }
 
@@ -1105,7 +1247,7 @@
             try {
                 await signInWithPopup(auth, googleProvider);
                 showToast("Успешный вход!", "success");
-                closeAuthModal();
+                window.closeAuthModal();
             } catch (error) {
                 if (error.code === 'auth/unauthorized-domain') {
                     showToast("Ошибка: Домен не добавлен в список разрешенных!", "error");
@@ -1125,7 +1267,7 @@
             try {
                 await signInWithEmailAndPassword(auth, email, password);
                 showToast("Вы успешно вошли!", "success");
-                closeAuthModal();
+                window.closeAuthModal();
             } catch (error) { showToast("Неверный логин или пароль!", "error"); }
         }
 
@@ -1139,49 +1281,19 @@
             try {
                 await createUserWithEmailAndPassword(auth, email, password);
                 showToast("Регистрация успешна!", "success");
-                closeRegModal();
+                window.closeRegModal();
             } catch (error) {
                 if (error.code === 'auth/email-already-in-use') showToast("Этот логин занят!", "error");
                 else showToast("Ошибка при создании аккаунта", "error");
             }
         }
 
-        // Интерфейсные окна (Модалки)
-        const modal = document.getElementById('detailsModal');
-        const authModal = document.getElementById('authModal');
-        const regModal = document.getElementById('regModal');
-        const profileModal = document.getElementById('profileModal');
-        const track = document.getElementById('sliderTrack');
-        let currentSlide = 0;
-
-        window.openModal = () => { modal.classList.add('active'); document.body.style.overflow = 'hidden'; updateSliderPosition(); }
-        window.closeModal = () => { modal.classList.remove('active'); document.body.style.overflow = 'auto'; }
-        window.openAuthModal = () => { closeModal(); closeRegModal(); closeProfileModal(); authModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
-        window.closeAuthModal = () => { authModal.classList.remove('active'); document.body.style.overflow = 'auto'; }
-        window.openRegModal = () => { closeModal(); closeAuthModal(); closeProfileModal(); regModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
-        window.closeRegModal = () => { regModal.classList.remove('active'); document.body.style.overflow = 'auto'; }
-        
-        window.openProfileModal = async () => { 
-            closeModal(); closeAuthModal(); closeRegModal(); 
-            if(auth.currentUser) {
-                const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
-                renderProfileModalData(snap.data());
-            }
-            profileModal.classList.add('active'); 
-            document.body.style.overflow = 'hidden'; 
-        }
-        window.closeProfileModal = () => { profileModal.classList.remove('active'); document.body.style.overflow = 'auto'; }
-
-        window.switchToReg = () => { openRegModal(); }
-        window.switchToAuth = () => { openAuthModal(); }
-        window.moveSlide = (direction) => { currentSlide = (currentSlide + direction + 4) % 4; updateSliderPosition(); }
-        function updateSliderPosition() { track.style.transform = `translateX(-${currentSlide * 100}%)`; }
-
+        // Закрытие модалок по клику вне области
         window.addEventListener('click', (e) => {
-            if(e.target === modal) closeModal();
-            if(e.target === authModal) closeAuthModal();
-            if(e.target === regModal) closeRegModal();
-            if(e.target === profileModal) closeProfileModal();
+            if(e.target === document.getElementById('detailsModal')) window.closeModal();
+            if(e.target === document.getElementById('authModal')) window.closeAuthModal();
+            if(e.target === document.getElementById('regModal')) window.closeRegModal();
+            if(e.target === document.getElementById('profileModal')) window.closeProfileModal();
         });
     </script>
 </body>
