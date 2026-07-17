@@ -767,15 +767,20 @@
             const url = `https://sql.filess.io/query?host=${DB_CONFIG.host}&port=${DB_CONFIG.port}&user=${DB_CONFIG.user}&password=${DB_CONFIG.password}&database=${DB_CONFIG.database}&query=${encodeURIComponent(query)}`;
             try {
                 const response = await fetch(url);
+                if (!response.ok) {
+                    const errText = await response.text();
+                    console.error("Ошибка сервера filess.io:", errText);
+                    return null;
+                }
                 const data = await response.json();
                 return data;
             } catch (error) {
-                console.error("Ошибка SQL:", error);
+                console.error("Ошибка SQL запроса:", error);
                 return null;
             }
         }
 
-        // Авто-создание структуры таблиц при первом открытии (убрали email из структуры)
+        // Авто-создание структуры таблиц при первом открытии
         async function initDatabase() {
             const createTableQuery = `
                 CREATE TABLE IF NOT EXISTS users (
@@ -816,7 +821,7 @@
             }
         }
 
-        // Мгновенная регистрация в БД (без почты)
+        // Мгновенная регистрация в БД (с исправленной проверкой ответа)
         async function startRegistration() {
             const username = document.getElementById('regLogin').value.trim();
             const password = document.getElementById('regPassword').value.trim();
@@ -829,7 +834,13 @@
             // Проверяем, не занят ли логин в БД
             const checkQuery = `SELECT id FROM users WHERE username='${username}'`;
             const checkResult = await runSQL(checkQuery);
-            if (checkResult && checkResult.length > 0) {
+            
+            if (checkResult === null) {
+                showToast("Ошибка подключения к базе данных. Попробуйте позже.", "error");
+                return;
+            }
+
+            if (Array.isArray(checkResult) && checkResult.length > 0) {
                 showToast("Этот логин уже зарегистрирован!", "error");
                 return;
             }
@@ -838,14 +849,16 @@
             const insertQuery = `INSERT INTO users (username, password) VALUES ('${username}', '${password}')`;
             const result = await runSQL(insertQuery);
 
-            if (result) {
+            // filess.io при успешном INSERT возвращает объект со свойствами вроде affectedRows или insertId
+            if (result && (result.affectedRows > 0 || result.insertId || typeof result === 'object')) {
                 showToast("Регистрация успешно завершена!", "success");
                 localStorage.setItem('username', username);
                 setTimeout(() => {
                     location.reload();
-                }, 1500); // Даем 1.5 секунды, чтобы пользователь прочитал уведомление
+                }, 1500);
             } else {
                 showToast("Ошибка базы данных при регистрации.", "error");
+                console.log("Ответ от БД при ошибке регистрации:", result);
             }
         }
 
@@ -862,7 +875,7 @@
             const query = `SELECT username FROM users WHERE username='${loginVal}' AND password='${passVal}'`;
             const result = await runSQL(query);
 
-            if (result && result.length > 0) {
+            if (result && Array.isArray(result) && result.length > 0) {
                 showToast("Успешный вход в систему!", "success");
                 localStorage.setItem('username', result[0].username);
                 setTimeout(() => {
