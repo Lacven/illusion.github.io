@@ -3,907 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ILLUSION — Premium Emulator System</title>
-
+    <title>Illusion Stacks</title>
     <style>
-        /* Базовые настройки и шрифты */
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
+        /* Базовые стили для демонстрации структуры и всплывающих уведомлений */
         :root {
-            --glow-color: rgba(255, 255, 255, 0.8);
-            --bg-color: #030303;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --card-border: rgba(255, 255, 255, 0.08);
+            --bg-color: #0b0b0b;
+            --card-bg: #161616;
+            --text-color: #ffffff;
+            --accent-color: #3b82f6;
         }
-
         body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
-            color: #ffffff;
-            overflow-x: hidden;
-            position: relative;
+            color: var(--text-color);
         }
-
-        /* Анимированный футуристичный фон */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: 
-                linear-gradient(rgba(255, 255, 255, 0.005) 1px, transparent 1px) 0 0 / 40px 40px,
-                linear-gradient(90deg, rgba(255, 255, 255, 0.005) 1px, transparent 1px) 0 0 / 40px 40px,
-                radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
-            z-index: -1;
-            pointer-events: none;
-            animation: bgPulse 10s infinite alternate;
-        }
-
-        @keyframes bgPulse {
-            0% { opacity: 0.7; transform: scale(1); }
-            100% { opacity: 1; transform: scale(1.05); }
-        }
-
-        a { color: inherit; text-decoration: none; transition: all 0.3s ease; }
-
-        /* Шапка с эффектом размытия стекла */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 25px 5%;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--card-border);
-            position: fixed;
-            width: 100%; top: 0; z-index: 100;
-            background: rgba(3, 3, 3, 0.7);
+            padding: 20px 40px;
+            background-color: var(--card-bg);
         }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
             cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-blue { background-color: var(--accent-color); color: #fff; }
+        .btn-white { background-color: #fff; color: #000; }
+        
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 15px;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 6px;
+            box-sizing: border-box;
         }
 
-        .logo-img { height: 35px; width: auto; object-fit: contain; }
-
-        .logo-text {
-            font-weight: 800;
-            letter-spacing: 4px;
-            font-size: 1.4rem;
-            background: linear-gradient(180deg, #fff 0%, #888 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 12px rgba(255,255,255,0.3));
-        }
-
-        .nav-buttons { display: flex; gap: 20px; align-items: center; }
-
-        /* Кнопка профиля в шапке с аватаркой */
+        /* Навигация профиля */
         .profile-nav-btn {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--card-border);
-            padding: 6px 16px 6px 6px;
-            border-radius: 30px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            background: #222;
+            padding: 5px 15px;
+            border-radius: 20px;
         }
-        .profile-nav-btn:hover {
-            border-color: rgba(255,255,255,0.4);
-            background: rgba(255,255,255,0.08);
-        }
-        .profile-nav-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .profile-nav-name {
-            font-size: 0.9rem;
-            font-weight: 600;
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+        .profile-nav-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+        .profile-avatar-large { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; cursor: pointer; }
 
-        /* Кнопки */
-        .btn {
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            letter-spacing: 1px;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            overflow: hidden;
-        }
+        /* Слайдер / Контент */
+        .main-content { padding: 40px; text-align: center; }
+        .slider-container { overflow: hidden; max-width: 600px; margin: 20px auto; position: relative; }
+        .slider-track { display: flex; transition: transform 0.4s ease; }
+        .slide { min-width: 100%; box-sizing: border-box; padding: 40px; background: var(--card-bg); border-radius: 12px; }
 
-        .btn-outline {
-            border: 1px solid var(--card-border);
-            background: rgba(255,255,255,0.02);
-            color: #fff;
-        }
-
-        .btn-outline:hover {
-            border-color: #fff;
-            background: #fff;
-            color: #000;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .btn-white {
-            background: #ffffff;
-            border: 1px solid #ffffff;
-            color: #000000;
-            box-shadow: 0 4px 15px rgba(255,255,255,0.1);
-        }
-
-        .btn-white:hover {
-            background: #000;
-            color: #fff;
-            border-color: rgba(255,255,255,0.3);
-            box-shadow: 0 0 35px rgba(255, 255, 255, 0.6);
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: rgba(255, 74, 74, 0.1);
-            border: 1px solid rgba(255, 74, 74, 0.3);
-            color: #ff4a4a;
-        }
-        .btn-danger:hover {
-            background: #ff4a4a;
-            color: #fff;
-            box-shadow: 0 0 25px rgba(255, 74, 74, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .btn-text {
-            background: transparent;
-            border: none;
-            color: #888;
-            cursor: pointer;
-            font-size: 0.9rem;
-            text-decoration: underline;
-            transition: color 0.3s;
-            margin-top: 15px;
-            display: inline-block;
-        }
-        .btn-text:hover { color: #fff; }
-
-        /* Главный экран */
-        .hero {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 0 20px;
-            perspective: 1000px;
-        }
-
-        .hero h1 {
-            font-size: 7rem;
-            font-weight: 800;
-            letter-spacing: 25px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            background: linear-gradient(180deg, #ffffff 0%, #555555 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: textGlow 3s infinite alternate cubic-bezier(0.45, 0.05, 0.55, 0.95);
-        }
-
-        .hero p {
-            font-size: 1.1rem;
-            color: #666;
-            letter-spacing: 8px;
-            text-transform: uppercase;
-            font-weight: 400;
-            position: relative;
-        }
-
-        .hero p::after {
-            content: '';
-            position: absolute;
-            bottom: -15px; left: 50%; transform: translateX(-50%);
-            width: 50px; height: 1px; background: #fff;
-            box-shadow: 0 0 10px #fff;
-        }
-
-        @keyframes textGlow {
-            0% { filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
-            100% { filter: drop-shadow(0 0 40px rgba(255,255,255,0.7)); letter-spacing: 28px; }
-        }
-
-        /* Контейнеры секций */
-        .section {
-            padding: 120px 5%;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .section-title {
-            font-size: 2.2rem;
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            margin-bottom: 60px;
-            font-weight: 800;
-            position: relative;
-            display: inline-block;
-        }
-
-        /* Интерактивная 3D Сетка Скриншотов */
-        .screenshot-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            perspective: 1000px;
-        }
-
-        .screen-card {
-            overflow: hidden;
-            border-radius: 14px;
-            border: 1px solid var(--card-border);
-            background: rgba(10, 10, 10, 0.5);
-            aspect-ratio: 16/10;
-            cursor: pointer;
-            position: relative;
-            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.4s, box-shadow 0.4s;
-            transform-style: preserve-3d;
-        }
-
-        .screen-card img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-
-        .screen-card:hover {
-            border-color: rgba(255, 255, 255, 0.4);
-            box-shadow: 0 20px 40px rgba(255, 255, 255, 0.1), 0 0 30px rgba(255,255,255,0.02);
-            transform: translateY(-10px) rotateX(4deg) rotateY(-4deg);
-        }
-
-        .screen-card:hover img {
-            transform: scale(1.05);
-        }
-
-        /* Карточки тарифов */
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 40px;
-            margin-top: 20px;
-        }
-
-        .price-card {
-            background: linear-gradient(145deg, rgba(15,15,15,0.6) 0%, rgba(5,5,5,0.6) 100%);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 50px 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .price-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at top right, rgba(255,255,255,0.04), transparent 60%);
-            border-radius: 16px;
-            pointer-events: none;
-        }
-
-        .price-card:hover {
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 255, 255, 0.05);
-            transform: translateY(-8px);
-        }
-
-        .price-card.disabled {
-            opacity: 0.3;
-            filter: grayscale(1);
-        }
-
-        .badge {
-            position: absolute;
-            top: 25px; right: 25px;
-            background: #fff; color: #000;
-            padding: 5px 14px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-radius: 30px;
-            box-shadow: 0 0 15px rgba(255,255,255,0.5);
-        }
-
-        .price-title {
-            font-size: 1.8rem;
-            letter-spacing: 3px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.1);
-        }
-
-        .price-value {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 40px;
-            background: linear-gradient(90deg, #fff, #999);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-
-        .price-actions { display: flex; flex-direction: column; gap: 15px; }
-
-        /* Всплывающий премиум-интерфейс (Модалка) */
-        .modal {
+        /* Трей-уведомления (Toasts) */
+        #toastContainer {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(2, 2, 2, 0.92);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0; pointer-events: none;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            padding: 20px;
-        }
-
-        .modal.active { opacity: 1; pointer-events: auto; }
-
-        .modal-content {
-            background: #090909;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            max-width: 900px; width: 100%;
-            max-height: 85vh; overflow-y: auto;
-            border-radius: 20px; position: relative;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.9), 0 0 60px rgba(255,255,255,0.03);
-            transform: scale(0.95) translateY(20px);
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .modal-content-sm {
-            max-width: 420px;
-            padding: 40px;
-        }
-
-        .modal.active .modal-content {
-            transform: scale(1) translateY(0);
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 25px; right: 25px;
-            font-size: 1.8rem; color: #555;
-            cursor: pointer; z-index: 10;
-            transition: color 0.3s;
-        }
-        .close-modal:hover { color: #fff; }
-
-        /* Поля ввода */
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        .form-group label {
-            display: block;
-            font-size: 0.8rem;
-            color: #888;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-        .form-input {
-            width: 100%;
-            padding: 14px;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--card-border);
-            border-radius: 8px;
-            color: #fff;
-            font-size: 0.95rem;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        .form-input:focus {
-            outline: none;
-            border-color: rgba(255,255,255,0.4);
-            box-shadow: 0 0 15px rgba(255,255,255,0.05);
-        }
-
-        /* Элитный Слайдер */
-        .slider-container {
-            width: 100%; position: relative;
-            aspect-ratio: 16/9; background: #000;
-            overflow: hidden;
-            border-bottom: 1px solid var(--card-border);
-        }
-
-        .slider-track { display: flex; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-        .slide { min-width: 100%; height: 100%; }
-        .slide img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .slider-btn {
-            position: absolute; top: 50%; transform: translateY(-50%);
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1); color: white;
-            width: 50px; height: 50px; border-radius: 50%;
-            cursor: pointer; font-size: 1.2rem;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s;
-        }
-        .slider-btn:hover { background: #fff; color: #000; border-color: #fff; box-shadow: 0 0 15px #fff;}
-        .prev-btn { left: 20px; }
-        .next-btn { right: 20px; }
-
-        /* Описание тарифа */
-        .modal-body { padding: 50px; }
-        .modal-desc-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 25px; letter-spacing: 2px; }
-        
-        .price-tag-info {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--card-border);
-            padding: 20px; border-radius: 10px;
-            margin-bottom: 35px; font-size: 1rem; line-height: 1.8;
-        }
-
-        /* Сетка фич */
-        .features-list {
-            list-style: none;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 16px; margin-bottom: 40px;
-            font-size: 0.95rem; color: #aaa;
-        }
-
-        .features-list li {
-            display: flex; align-items: center; gap: 12px;
-            transition: color 0.3s;
-        }
-        .features-list li:hover { color: #fff; }
-        .features-list li::before {
-            content: "";
-            display: inline-block; width: 6px; height: 6px;
-            background: #fff; border-radius: 50%;
-            box-shadow: 0 0 8px #fff;
-        }
-
-        .contacts-block {
-            border-top: 1px solid var(--card-border);
-            padding-top: 30px;
-        }
-
-        .contacts-grid { display: flex; gap: 30px; margin-top: 15px; }
-        
-        .link-accent {
-            position: relative; font-weight: 600; color: #fff;
-        }
-        .link-accent::after {
-            content: ''; position: absolute; bottom: -4px; left: 0;
-            width: 0; height: 1px; background: #fff;
-            transition: width 0.3s ease;
-        }
-        .link-accent:hover::after { width: 100%; }
-
-        /* ИНТЕРФЕЙС ЛИЧНОГО КАБИНЕТА */
-        .profile-container {
-            display: grid;
-            grid-template-columns: 220px 1fr;
-            gap: 40px;
-            text-align: left;
-        }
-        .profile-sidebar {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border-right: 1px solid var(--card-border);
-            padding-right: 30px;
-        }
-        .profile-avatar-wrapper {
-            position: relative;
-            width: 130px;
-            height: 130px;
-            margin-bottom: 20px;
-        }
-        .profile-main-avatar {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid rgba(255,255,255,0.2);
-        }
-        .avatar-upload-label {
-            position: absolute;
-            bottom: 0; right: 0;
-            background: #fff; color: #000;
-            width: 34px; height: 34px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-size: 0.9rem; font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-            transition: transform 0.2s;
-        }
-        .avatar-upload-label:hover { transform: scale(1.1); }
-        .profile-balance-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--card-border);
-            padding: 15px;
-            width: 100%;
-            border-radius: 10px;
-            text-align: center;
-            margin-top: 10px;
-        }
-        .balance-val {
-            font-size: 1.4rem; font-weight: 800; color: #fff; margin-top: 5px;
-        }
-        .profile-main-content {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
-        .items-list {
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            margin-top: 10px;
         }
-        .item-row {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--card-border);
-            padding: 14px 20px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .item-status {
-            font-size: 0.8rem;
-            padding: 4px 10px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.1);
-            font-weight: 600;
-        }
-
-        /* Подвал */
-        footer {
-            background: #010101;
-            border-top: 1px solid var(--card-border);
-            padding: 80px 5%;
-            font-size: 0.85rem; color: #444;
-        }
-
-        .footer-content {
-            max-width: 1400px; margin: 0 auto;
-            display: flex; flex-wrap: wrap;
-            justify-content: space-between; gap: 50px;
-        }
-
-        .footer-links { display: flex; flex-wrap: wrap; gap: 35px; }
-        .footer-links a:hover { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.4); }
-
-        /* Кастомный контейнер премиум-уведомлений */
-        #toastContainer {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            pointer-events: none;
-            max-width: 350px;
-            width: 100%;
-        }
-
         .toast {
-            background: rgba(10, 10, 10, 0.9);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 15px 25px;
+            border-radius: 8px;
             color: #fff;
-            padding: 16px 22px;
-            border-radius: 12px;
-            font-size: 0.9rem;
             font-weight: 500;
-            letter-spacing: 0.5px;
-            line-height: 1.4;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.02);
-            display: flex;
-            align-items: center;
-            pointer-events: auto;
-            transform: translateY(100px);
-            opacity: 0;
-            animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease forwards;
+            min-width: 200px;
         }
-
-        .toast.hide {
-            animation: slideOut 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .toast-success {
-            border-left: 4px solid #ffffff;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6), 0 0 20px rgba(255, 255, 255, 0.15);
-        }
-
-        .toast-error {
-            border-left: 4px solid #ff4a4a;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6), 0 0 20px rgba(255, 74, 74, 0.15);
-        }
-
-        @keyframes slideIn { to { transform: translateY(0); opacity: 1; } }
-        @keyframes slideOut { to { transform: translateY(40px) scale(0.95); opacity: 0; } }
-
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 3.5rem; letter-spacing: 10px; }
-            header { padding: 20px; }
-            .section { padding: 80px 20px; }
-            .modal-body { padding: 25px; }
-            .price-card { padding: 35px 25px; }
-            .profile-container { grid-template-columns: 1fr; gap: 20px; }
-            .profile-sidebar { border-right: none; padding-right: 0; border-bottom: 1px solid var(--card-border); padding-bottom: 20px; }
-            #toastContainer { right: 20px; bottom: 20px; left: 20px; max-width: calc(100% - 40px); }
-        }
+        .toast-success { background: #10b981; }
+        .toast-error { background: #ef4444; }
+        .toast.hide { animation: slideOut 0.4s ease forwards; }
+        @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <!-- Шапка -->
+    <!-- ШАПКА САЙТА -->
     <header>
-        <div class="logo-container">
-            <img src="logo.png" alt="" class="logo-img" onerror="this.style.display='none'">
-            <span class="logo-text">ILLUSION</span>
-        </div>
-        <div class="nav-buttons" id="headerAuthBlock">
-            <!-- Динамически меняется на Войти или Профиль -->
+        <div class="logo" style="font-size: 1.5rem; font-weight: bold;">ILLUSION</div>
+        <!-- Динамический блок авторизации -->
+        <div id="headerAuthBlock">
             <button class="btn btn-white" onclick="openAuthModal()">Войти</button>
         </div>
     </header>
 
-    <!-- Главный блок -->
-    <section class="hero">
-        <h1>Illusion</h1>
-        <p>лучший кастомный эмулятор</p>
-    </section>
+    <!-- ГЛАВНЫЙ КОНТЕНТ И КНОПКА ПОКУПКИ -->
+    <main class="main-content">
+        <h1>Лицензия ILLUSION PRO</h1>
+        <p>Получите полный доступ к функционалу всего за 500 ₽</p>
+        <button class="btn btn-blue" style="font-size: 1.2rem; padding: 15px 40px;" onclick="handleBuyClick()">Купить сейчас</button>
+        
+        <br><br>
+        <button class="btn" onclick="openModal()">Открыть инфо-слайдер</button>
+    </main>
 
-    <!-- Скриншоты -->
-    <section class="section">
-        <h2 class="section-title">Интерфейс системы</h2>
-        <div class="screenshot-grid">
-            <div class="screen-card"><img src="screen1.jpg" alt="Интерфейс 1" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\\'><rect width=\'100%\' height=\'100%\' fill=\'%230a0a0a\'/><text x=\'50%\' y=\'50%\' fill=\'%23222\' font-weight=\'800\' text-anchor=\'middle\'>SCREEN 1</text></svg>'"></div>
-            <div class="screen-card"><img src="screen2.jpg" alt="Интерфейс 2" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\\'><rect width=\'100%\' height=\'100%\' fill=\'%230a0a0a\'/><text x=\'50%\' y=\'50%\' fill=\'%23222\' font-weight=\'800\' text-anchor=\'middle\'>SCREEN 2</text></svg>'"></div>
-            <div class="screen-card"><img src="screen3.jpg" alt="Интерфейс 3" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\\'><rect width=\'100%\' height=\'100%\' fill=\'%230a0a0a\'/><text x=\'50%\' y=\'50%\' fill=\'%23222\' font-weight=\'800\' text-anchor=\'middle\'>SCREEN 3</text></svg>'"></div>
-            <div class="screen-card"><img src="screen4.jpg" alt="Интерфейс 4" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\\'><rect width=\'100%\' height=\'100%\' fill=\'%230a0a0a\'/><text x=\'50%\' y=\'50%\' fill=\'%23222\' font-weight=\'800\' text-anchor=\'middle\'>SCREEN 4</text></svg>'"></div>
-        </div>
-    </section>
-
-    <!-- Тарифы -->
-    <section class="section">
-        <h2 class="section-title">Тарифы</h2>
-        <div class="pricing-grid">
-            <div class="price-card">
-                <div>
-                    <div class="price-title">ILLUSION PRO</div>
-                    <div class="price-value">500 ₽</div>
-                </div>
-                <div class="price-actions">
-                    <button class="btn btn-white" onclick="handleBuyClick()">Купить</button>
-                    <button class="btn btn-outline" onclick="openModal()">Подробнее</button>
-                </div>
-            </div>
-
-            <div class="price-card disabled">
-                <span class="badge">In Dev</span>
-                <div>
-                    <div class="price-title">ILLUSION MAX</div>
-                    <div class="price-value">—</div>
-                </div>
-                <div class="price-actions">
-                    <button class="btn btn-outline" disabled style="cursor: not-allowed;">В разработке</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Подробное модальное окно -->
-    <div class="modal" id="detailsModal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
+    <!-- МОДАЛКА 1: ИНФО-СЛАЙДЕР -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
             <div class="slider-container">
-                <div class="slider-track" id="sliderTrack">
-                    <div class="slide"><img src="screen1.jpg" alt="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\\'><rect width=\'100%\' height=\'100%\' fill=\'%23050505\'/></svg>'"></div>
-                    <div class="slide"><img src="screen2.jpg" alt="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\\'><rect width=\'100%\' height=\'100%\' fill=\'%23050505\'/></svg>'"></div>
-                    <div class="slide"><img src="screen3.jpg" alt="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\\'><rect width=\'100%\' height=\'100%\' fill=\'%23050505\'/></svg>'"></div>
-                    <div class="slide"><img src="screen4.jpg" alt="" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\\'><rect width=\'100%\' height=\'100%\' fill=\'%23050505\'/></svg>'"></div>
+                <div id="sliderTrack" class="slider-track">
+                    <div class="slide"><h3>Преимущество 1</h3><p>Высокая скорость работы скриптов.</p></div>
+                    <div class="slide"><h3>Преимущество 2</h3><p>Полная автоматизация процессов.</p></div>
+                    <div class="slide"><h3>Преимущество 3</h3><p>Удобный и понятный интерфейс.</p></div>
+                    <div class="slide"><h3>Преимущество 4</h3><p>Поддержка пользователей 24/7.</p></div>
                 </div>
-                <button class="slider-btn prev-btn" onclick="moveSlide(-1)">&#10094;</button>
-                <button class="slider-btn next-btn" onclick="moveSlide(1)">&#10095;</button>
             </div>
-
-            <div class="modal-body">
-                <h3 class="modal-desc-title">ВЫШЕЛ ЛУЧШИЙ ЭМУЛЯТОР ILLUSION!</h3>
-                <div class="price-tag-info">
-                    <strong>Стоимость лицензии:</strong> Установка 500₽ | 750g <br>
-                    Для платежей из других стран доступен метод через <strong>DONATALERTS</strong> (детали уточняйте в ЛС).
-                </div>
-
-                <div style="margin-bottom: 20px; font-weight: 800; letter-spacing: 2px; font-size: 0.9rem;">ТЕХНИЧЕСКИЕ ОСОБЕННОСТИ:</div>
-                <ul class="features-list">
-                    <li>Собственное ядро: эмулятор и лоудер написаны с нуля</li>
-                    <li>Высокопроизводительный красивый установщик</li>
-                    <li>Максимальный прирост FPS в играх</li>
-                    <li>Встроенный кастомный прицел с гибкой настройкой</li>
-                    <li>Инновационные алгоритмы оптимизации системы</li>
-                    <li>Продвинутые пресеты сенсы под любые стили игры</li>
-                    <li>Стабильная работа без вылетов и зависаний</li>
-                    <li>Абсолютная конфиденциальность: вырезана вся телеметрия</li>
-                    <li>Уникальный визуальный стиль (черно-красные и белые темы)</li>
-                    <li>Самый лояльный прайс на рынке приватного софта</li>
-                    <li>Кастомный алгоритм ввода: никаких срывов сенсора мыши</li>
-                    <li>Большой выбор режимов графики (включая режим "картошки")</li>
-                    <li>Современный графический движок без просадок кадров</li>
-                    <li>Безопасные твики: оптимизация никогда не крашит Windows</li>
-                </ul>
-
-                <div class="contacts-block">
-                    <div style="font-weight: 600; color: #666;">КОММУНИКАЦИЯ И РЕСУРСЫ</div>
-                    <div class="contacts-grid">
-                        <span>Заказ: <a href="https://t.me/meksi12" class="link-accent">@meksi12</a>, <a href="https://t.me/Lacven" class="link-accent">@Lacven</a></span>
-                        <span><a href="#" class="link-accent" onclick="showToast('Переход к отзывам...', 'success')">Отзывы клиентов</a></span>
-                        <span><a href="#" class="link-accent" onclick="showToast('Переход к видеообзору...', 'success')">Видеообзор</a></span>
-                    </div>
-                </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                <button class="btn" onclick="moveSlide(-1)">Назад</button>
+                <button class="btn" onclick="moveSlide(1)">Вперед</button>
             </div>
         </div>
     </div>
 
-    <!-- Модальное окно: Личный Кабинет / Профиль -->
-    <div class="modal" id="profileModal">
-        <div class="modal-content" style="max-width: 750px; padding: 40px;">
-            <span class="close-modal" onclick="closeProfileModal()">&times;</span>
-            <h3 class="modal-desc-title" style="margin-bottom: 30px; text-align: left;">Личный Кабинет</h3>
-            
-            <div class="profile-container">
-                <!-- Сайдбар: Аватарка и Баланс -->
-                <div class="profile-sidebar">
-                    <div class="profile-avatar-wrapper">
-                        <img id="profileMainAvatar" src="" class="profile-main-avatar" alt="Аватар">
-                        <label for="avatarUrlInput" class="avatar-upload-label" onclick="changeAvatarPrompt(event)">✎</label>
-                    </div>
-                    <div class="profile-balance-card">
-                        <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px;">Ваш баланс</div>
-                        <div class="balance-val" id="profileBalance">0 ₽</div>
-                    </div>
-                    <button class="btn btn-danger" style="width: 100%; margin-top: 30px; padding: 10px;" onclick="logOut()">Выйти</button>
-                </div>
-
-                <!-- Основная инфа: Настройки и вещи -->
-                <div class="profile-main-content">
-                    <div>
-                        <div style="font-weight: 800; font-size: 0.85rem; letter-spacing: 1px; color: #666; margin-bottom: 15px; text-transform: uppercase;">Настройки аккаунта</div>
-                        
-                        <div class="form-group">
-                            <label>Никнейм / Логин</label>
-                            <div style="display:flex; gap:10px;">
-                                <input type="text" id="profileNameInput" class="form-input">
-                                <button class="btn btn-white" style="padding: 0 20px;" onclick="updateProfileName()">Ок</button>
-                            </div>
-                        </div>
-
-                        <div id="passwordChangeBlock" class="form-group" style="display: none;">
-                            <label>Новый пароль</label>
-                            <div style="display:flex; gap:10px;">
-                                <input type="password" id="profilePasswordInput" class="form-input" placeholder="Минимум 6 символов">
-                                <button class="btn btn-white" style="padding: 0 20px;" onclick="updateProfilePassword()">Изменить</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div style="font-weight: 800; font-size: 0.85rem; letter-spacing: 1px; color: #666; margin-bottom: 10px; text-transform: uppercase;">Мои товары</div>
-                        <div class="items-list" id="profileItemsList">
-                            <!-- Сюда прилетают купленные подписки -->
-                            <div style="color:#444; font-size:0.9rem;">Список пуст</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Модальное окно: Авторизация (Вход) -->
-    <div class="modal" id="authModal">
-        <div class="modal-content modal-content-sm" style="text-align: center;">
-            <span class="close-modal" onclick="closeAuthModal()">&times;</span>
-            <h3 class="modal-desc-title" style="margin-bottom: 30px;">Авторизация</h3>
-            
+    <!-- МОДАЛКА 2: ВХОД -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeAuthModal()">&times;</span>
+            <h2>Авторизация</h2>
             <div class="form-group">
-                <label for="authLogin">Логин</label>
-                <input type="text" id="authLogin" class="form-input" placeholder="Введите ваш логин">
+                <label>Логин или Email</label>
+                <input type="text" id="authLogin" placeholder="username или email@example.com">
             </div>
-            
             <div class="form-group">
-                <label for="authPassword">Пароль</label>
-                <input type="password" id="authPassword" class="form-input" placeholder="Введите ваш пароль">
+                <label>Пароль</label>
+                <input type="password" id="authPassword" placeholder="••••••••">
             </div>
-            
-            <button class="btn btn-white" style="width: 100%; margin-top: 10px;" onclick="submitAuth()">Продолжить</button>
-            
-            <button class="btn btn-outline" style="width: 100%; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 10px;" onclick="signInWithGoogle()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                Войти через Google
-            </button>
-
-            <button class="btn btn-text" onclick="switchToReg()">Зарегистрироваться</button>
+            <button class="btn btn-blue" style="width: 100%; margin-bottom: 10px;" onclick="submitAuth()">Войти</button>
+            <button class="btn btn-white" style="width: 100%; margin-bottom: 15px;" onclick="signInWithGoogle()">Войти через Google</button>
+            <p style="text-align:center; font-size:0.9rem; color:#aaa;">Нет аккаунта? <span style="color:#fff; cursor:pointer; text-decoration:underline;" onclick="switchToReg()">Зарегистрироваться</span></p>
         </div>
     </div>
 
-    <!-- Модальное окно: Регистрация -->
-    <div class="modal" id="regModal">
-        <div class="modal-content modal-content-sm" style="text-align: center;">
-            <span class="close-modal" onclick="closeRegModal()">&times;</span>
-            <h3 class="modal-desc-title" style="margin-bottom: 30px;">Регистрация</h3>
-            
-            <div id="regFormBody">
-                <div class="form-group">
-                    <label for="regLogin">Придумайте логин</label>
-                    <input type="text" id="regLogin" class="form-input" placeholder="Логин">
-                </div>
-                
-                <div class="form-group">
-                    <label for="regPassword">Придумайте пароль</label>
-                    <input type="password" id="regPassword" class="form-input" placeholder="Пароль">
-                </div>
-                
-                <button class="btn btn-white" style="width: 100%; margin-top: 10px;" onclick="startRegistration()">Создать аккаунт</button>
-                <button class="btn btn-text" onclick="switchToAuth()">Уже есть аккаунт? Войти</button>
+    <!-- МОДАЛКА 3: РЕГИСТРАЦИЯ -->
+    <div id="regModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeRegModal()">&times;</span>
+            <h2>Регистрация</h2>
+            <div class="form-group">
+                <label>Придумайте Логин</label>
+                <input type="text" id="regLogin" placeholder="Например: user777">
             </div>
+            <div class="form-group">
+                <label>Пароль (минимум 6 символов)</label>
+                <input type="password" id="regPassword" placeholder="••••••••">
+            </div>
+            <button class="btn btn-blue" style="width: 100%; margin-bottom: 15px;" onclick="startRegistration()">Создать аккаунт</button>
+            <p style="text-align:center; font-size:0.9rem; color:#aaa;">Уже есть аккаунт? <span style="color:#fff; cursor:pointer; text-decoration:underline;" onclick="switchToAuth()">Войти</span></p>
         </div>
     </div>
 
-    <!-- Контейнер для всплывающих Тост-уведомлений -->
+    <!-- МОДАЛКА 4: ЛИЧНЫЙ КАБИНЕТ (ПРОФИЛЬ) -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeProfileModal()">&times;</span>
+            <h2>Личный кабинет</h2>
+            <div style="text-align: center;">
+                <img id="profileMainAvatar" class="profile-avatar-large" src="" onclick="changeAvatarPrompt(event)" title="Нажмите, чтобы изменить аватар">
+                <div style="font-size: 0.9rem; color: #aaa; margin-top: -10px; margin-bottom: 15px;">Нажмите на фото для смены ссылки</div>
+                <div style="font-size: 1.2rem; margin-bottom: 5px;">Баланс: <strong id="profileBalance" style="color:#10b981;">0 ₽</strong></div>
+            </div>
+            
+            <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+
+            <div class="form-group">
+                <label>Ваш никнейм</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="profileNameInput">
+                    <button class="btn btn-blue" onclick="updateProfileName()">Save</button>
+                </div>
+            </div>
+
+            <div id="passwordChangeBlock" class="form-group">
+                <label>Новый пароль</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="password" id="profilePasswordInput" placeholder="Новый пароль">
+                    <button class="btn btn-blue" onclick="updateProfilePassword()">Изменить</button>
+                </div>
+            </div>
+
+            <h3>Ваши лицензии:</h3>
+            <div id="profileItemsList" style="background:#222; padding:10px; border-radius:6px; max-height:120px; overflow-y:auto;">
+                <!-- Сюда добавляются купленные лицензии -->
+            </div>
+
+            <button class="btn btn-white" style="width: 100%; margin-top: 20px; background:#ef4444; color:#fff;" onclick="logOut()">Выйти из аккаунта</button>
+        </div>
+    </div>
+
+    <!-- Контейнер для всплывающих уведомлений -->
     <div id="toastContainer"></div>
 
-    <!-- Подвал -->
-    <footer>
-        <div class="footer-content">
-            <div>
-                <p style="color: #fff; font-weight: 800; letter-spacing: 2px; margin-bottom: 12px;">© ILLUSION STACKS, 2026</p>
-                <p style="color: #333;">Engineered for ultimate performance.</p>
-            </div>
-            <div class="footer-links">
-                <a href="#">Политика конфиденциальности</a>
-                <a href="#">Публичная оферта</a>
-                <a href="https://telegra.ph/polzovatelskoe-soglashenie-06-18-22" target="_blank">Пользовательское соглашение</a>
-                <a href="https://t.me/Lacven">Поддержка: @Lacven</a>
-                <a href="mailto:illusionstacks@mail.ru">illusionstacks@mail.ru</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Подключаем Firebase SDK -->
+    <!-- FIREBASE СДК И ЛОГИКА ПРИЛОЖЕНИЯ -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -926,9 +257,10 @@
 
         const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23222'/><circle cx='50' cy='35' r='18' fill='%23888'/><path d='M15 85 C15 60, 85 60, 85 85' fill='%23888'/></svg>";
 
-        // Уведомления
-        function showToast(message, type = 'success') {
+        // Глобальная функция для уведомлений
+        window.showToast = function(message, type = 'success') {
             const container = document.getElementById('toastContainer');
+            if (!container) return;
             const toast = document.createElement('div');
             toast.className = `toast ${type === 'error' ? 'toast-error' : 'toast-success'}`;
             toast.innerText = message;
@@ -939,32 +271,34 @@
             }, 3500);
         }
 
-        // Проверка и инициализация данных юзера в Firestore
+        // Синхронизация данных пользователя с Firestore + Защита от отсутствующей БД
         async function syncUserData(user) {
-            const userRef = doc(db, "users", user.uid);
-            const userSnap = await getDoc(userRef);
-
             let baseName = user.displayName || user.email.split('@')[0];
             let baseAvatar = user.photoURL || defaultAvatar;
+            const fallbackData = { username: baseName, avatarUrl: baseAvatar, balance: 0, items: [] };
 
-            if (!userSnap.exists()) {
-                // Если юзера нет в БД, создаем стартовую анкету
-                await setDoc(userRef, {
-                    uid: user.uid,
-                    username: baseName,
-                    avatarUrl: baseAvatar,
-                    balance: 0,
-                    items: []
-                });
-                return { username: baseName, avatarUrl: baseAvatar, balance: 0, items: [] };
-            } else {
-                return userSnap.data();
+            try {
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+
+                if (!userSnap.exists()) {
+                    await setDoc(userRef, fallbackData);
+                    return fallbackData;
+                } else {
+                    return userSnap.data();
+                }
+            } catch (error) {
+                console.error("Ошибка Firestore:", error);
+                showToast("Предупреждение: База данных в Firebase не создана или закрыты правила доступа!", "error");
+                return fallbackData; // Возвращаем локальный объект, чтобы интерфейс не зависал
             }
         }
 
-        // Обновление кнопок в шапке
+        // Обновление кнопок в шапке (Вход / Профиль)
         function renderHeaderBlock(userData) {
             const block = document.getElementById('headerAuthBlock');
+            if (!block) return;
+            
             if (userData) {
                 block.innerHTML = `
                     <div class="profile-nav-btn" onclick="openProfileModal()">
@@ -980,29 +314,31 @@
         // Рендеринг данных внутри модалки ЛК
         function renderProfileModalData(userData) {
             if (!userData) return;
-            document.getElementById('profileMainAvatar').src = userData.avatarUrl;
-            document.getElementById('profileBalance').innerText = `${userData.balance} ₽`;
-            document.getElementById('profileNameInput').value = userData.username;
+            if (document.getElementById('profileMainAvatar')) document.getElementById('profileMainAvatar').src = userData.avatarUrl;
+            if (document.getElementById('profileBalance')) document.getElementById('profileBalance').innerText = `${userData.balance} ₽`;
+            if (document.getElementById('profileNameInput')) document.getElementById('profileNameInput').value = userData.username;
 
-            // Показываем/скрываем смену пароля (только для зашедших по логину/паролю)
-            const isGoogle = auth.currentUser.providerData.some(p => p.providerId === 'google.com');
-            document.getElementById('passwordChangeBlock').style.display = isGoogle ? 'none' : 'block';
+            const isGoogle = auth.currentUser?.providerData.some(p => p.providerId === 'google.com');
+            if (document.getElementById('passwordChangeBlock')) {
+                document.getElementById('passwordChangeBlock').style.display = isGoogle ? 'none' : 'block';
+            }
 
-            // Выводим товары
             const itemsList = document.getElementById('profileItemsList');
-            if (userData.items && userData.items.length > 0) {
-                itemsList.innerHTML = userData.items.map(item => `
-                    <div class="item-row">
-                        <span style="font-weight:600;">${item.name}</span>
-                        <span class="item-status">${item.status || 'Активна'}</span>
-                    </div>
-                `).join('');
-            } else {
-                itemsList.innerHTML = `<div style="color:#444; font-size:0.9rem;">У вас пока нет купленных лицензий</div>`;
+            if (itemsList) {
+                if (userData.items && userData.items.length > 0) {
+                    itemsList.innerHTML = userData.items.map(item => `
+                        <div class="item-row" style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.95rem;">
+                            <span style="font-weight:600; color:#fff;">${item.name}</span>
+                            <span class="item-status" style="color:#10b981;">${item.status || 'Активна'}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    itemsList.innerHTML = `<div style="color:#666; font-size:0.9rem;">У вас пока нет купленных лицензий</div>`;
+                }
             }
         }
 
-        // Слушатель авторизации
+        // Главный слушатель авторизации
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const data = await syncUserData(user);
@@ -1012,6 +348,94 @@
                 renderHeaderBlock(null);
             }
         });
+
+        // КНОПКА КУПИТЬ: Теперь строго реагирует на неавторизованных пользователей
+        window.handleBuyClick = async function() {
+            if (!auth.currentUser) {
+                showToast('Ошибка: Авторизуйтесь, чтобы совершить покупку!', 'error');
+                openAuthModal();
+                return;
+            }
+
+            try {
+                const ref = doc(db, "users", auth.currentUser.uid);
+                const snap = await getDoc(ref);
+                const data = snap.data() || { balance: 0, items: [], username: auth.currentUser.displayName };
+
+                if (data.balance >= 500) {
+                    let currentItems = data.items || [];
+                    currentItems.push({ name: "ILLUSION PRO", status: "Активна" });
+                    
+                    await updateDoc(ref, {
+                        balance: data.balance - 500,
+                        items: currentItems
+                    });
+
+                    showToast("Успешная покупка тарифа ILLUSION PRO!", "success");
+                    renderProfileModalData({ ...data, balance: data.balance - 500, items: currentItems });
+                    
+                    // Обновляем шапку
+                    renderHeaderBlock({ ...data, balance: data.balance - 500, items: currentItems });
+                } else {
+                    showToast('Недостаточно средств на балансе! Пожалуйста, пополните счет.', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('Ошибка транзакции. Убедитесь, что база данных Firestore создана в панели Firebase!', 'error');
+            }
+        }
+
+        // Вход через Google
+        window.signInWithGoogle = async function() {
+            try {
+                await signInWithPopup(auth, googleProvider);
+                showToast("Успешный вход через Google!", "success");
+                closeAuthModal();
+            } catch (error) {
+                console.error(error);
+                if (error.code === 'auth/unauthorized-domain') {
+                    showToast("Ошибка: Домен не добавлен в Authorized Domains в Firebase!", "error");
+                } else {
+                    showToast(`Ошибка входа: ${error.code || error.message}`, "error");
+                }
+            }
+        }
+
+        // Логин по паролю
+        window.submitAuth = async function() {
+            const loginVal = document.getElementById('authLogin').value.trim();
+            const password = document.getElementById('authPassword').value.trim();
+            if (!loginVal || !password) return showToast("Введите логин и пароль!", "error");
+
+            const email = loginVal.includes('@') ? loginVal : `${loginVal}@illusionmail.com`;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showToast("Вы успешно вошли!", "success");
+                closeAuthModal();
+            } catch (error) { 
+                console.error(error);
+                showToast("Неверный логин или пароль!", "error"); 
+            }
+        }
+
+        // Регистрация
+        window.startRegistration = async function() {
+            const loginVal = document.getElementById('regLogin').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            if (!loginVal || !password) return showToast("Заполните все поля!", "error");
+            if (password.length < 6) return showToast("Пароль должен быть от 6 символов!", "error");
+
+            const email = loginVal.includes('@') ? loginVal : `${loginVal}@illusionmail.com`;
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showToast("Регистрация успешна!", "success");
+                closeRegModal();
+            } catch (error) {
+                console.error(error);
+                if (error.code === 'auth/email-already-in-use') showToast("Этот логин уже занят!", "error");
+                else showToast(`Ошибка регистрации: ${error.code}`, "error");
+            }
+        }
 
         // Смена никнейма
         window.updateProfileName = async function() {
@@ -1023,18 +447,17 @@
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { username: newName });
                 showToast("Никнейм успешно изменен!", "success");
                 
-                // Перерисовываем
                 const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
                 renderHeaderBlock(snap.data());
-            } catch(e) { showToast("Ошибка обновления ника", "error"); }
+            } catch(e) { showToast("Ошибка изменения имени в БД", "error"); }
         }
 
-        // Смена аватарки по ссылке
+        // Смена аватарки (через prompt URL)
         window.changeAvatarPrompt = async function(e) {
             e.preventDefault();
-            const url = prompt("Вставьте прямую ссылку на изображение для аватарки:");
+            const url = prompt("Вставьте прямую ссылку на новую аватарку (jpg/png):");
             if (url === null) return;
-            if (!url.trim()) return showToast("Ссылка пустая!", "error");
+            if (!url.trim()) return showToast("Ссылка не может быть пустой!", "error");
 
             try {
                 await updateProfile(auth.currentUser, { photoURL: url });
@@ -1044,7 +467,7 @@
                 document.getElementById('profileMainAvatar').src = url;
                 const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
                 renderHeaderBlock(snap.data());
-            } catch(err) { showToast("Не удалось обновить аватар", "error"); }
+            } catch(err) { showToast("Не удалось сохранить аватар", "error"); }
         }
 
         // Смена пароля
@@ -1056,97 +479,18 @@
                 await updatePassword(auth.currentUser, newPass);
                 showToast("Пароль успешно изменен!", "success");
                 document.getElementById('profilePasswordInput').value = "";
-            } catch(e) {
-                showToast("Ошибка. Попробуйте перезайти в аккаунт и повторить.", "error");
-            }
+            } catch(e) { showToast("Ошибка безопасности. Пожалуйста, перезайдите в аккаунт.", "error"); }
         }
 
-        // Выход
+        // Выход из аккаунта
         window.logOut = function() {
-            if(confirm("Вы уверены, что хотите выйти?")) {
-                signOut(auth).then(() => {
-                    closeProfileModal();
-                    showToast("Вы вышли из системы.", "success");
-                });
-            }
+            signOut(auth).then(() => {
+                closeProfileModal();
+                showToast("Вы вышли из системы.", "success");
+            });
         }
 
-        // Купить товар
-        window.handleBuyClick = async function() {
-            if (!auth.currentUser) {
-                showToast('Пожалуйста, авторизуйтесь для покупки', 'error');
-                openAuthModal();
-                return;
-            }
-
-            // Эмуляция покупки: проверяем баланс юзера в Firestore
-            const ref = doc(db, "users", auth.currentUser.uid);
-            const snap = await getDoc(ref);
-            const data = snap.data();
-
-            if (data.balance >= 500) {
-                let currentItems = data.items || [];
-                currentItems.push({ name: "ILLUSION PRO", status: "Активна" });
-                
-                await updateDoc(ref, {
-                    balance: data.balance - 500,
-                    items: currentItems
-                });
-
-                showToast("Успешная покупка тарифа ILLUSION PRO!", "success");
-                renderProfileModalData({ ...data, balance: data.balance - 500, items: currentItems });
-            } else {
-                showToast('Недостаточно средств. Платежный шлюз настраивается.', 'error');
-            }
-        }
-
-        // Авторизация Google
-        window.signInWithGoogle = async function() {
-            try {
-                await signInWithPopup(auth, googleProvider);
-                showToast("Успешный вход!", "success");
-                closeAuthModal();
-            } catch (error) {
-                if (error.code === 'auth/unauthorized-domain') {
-                    showToast("Ошибка: Домен не добавлен в список разрешенных!", "error");
-                } else {
-                    showToast(`Ошибка: ${error.code}`, "error");
-                }
-            }
-        }
-
-        // Логин по паролю
-        window.submitAuth = async function() {
-            const loginVal = document.getElementById('authLogin').value.trim();
-            const password = document.getElementById('authPassword').value.trim();
-            if (!loginVal || !password) return showToast("Введите логин и пароль!", "error");
-
-            const email = loginVal.includes('@') ? loginVal : `${loginVal}@mysite.com`;
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                showToast("Вы успешно вошли!", "success");
-                closeAuthModal();
-            } catch (error) { showToast("Неверный логин или пароль!", "error"); }
-        }
-
-        // Регистрация
-        window.startRegistration = async function() {
-            const loginVal = document.getElementById('regLogin').value.trim();
-            const password = document.getElementById('regPassword').value.trim();
-            if (!loginVal || !password) return showToast("Заполните все поля!", "error");
-
-            const email = loginVal.includes('@') ? loginVal : `${loginVal}@mysite.com`;
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                showToast("Регистрация успешна!", "success");
-                closeRegModal();
-            } catch (error) {
-                if (error.code === 'auth/email-already-in-use') showToast("Этот логин занят!", "error");
-                else showToast("Ошибка при создании аккаунта", "error");
-            }
-        }
-
-        // Интерфейсные окна (Модалки)
+        // Управление окнами интерфейса
         const modal = document.getElementById('detailsModal');
         const authModal = document.getElementById('authModal');
         const regModal = document.getElementById('regModal');
@@ -1164,8 +508,10 @@
         window.openProfileModal = async () => { 
             closeModal(); closeAuthModal(); closeRegModal(); 
             if(auth.currentUser) {
-                const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
-                renderProfileModalData(snap.data());
+                try {
+                    const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+                    if(snap.exists()) renderProfileModalData(snap.data());
+                } catch(e){}
             }
             profileModal.classList.add('active'); 
             document.body.style.overflow = 'hidden'; 
@@ -1175,7 +521,7 @@
         window.switchToReg = () => { openRegModal(); }
         window.switchToAuth = () => { openAuthModal(); }
         window.moveSlide = (direction) => { currentSlide = (currentSlide + direction + 4) % 4; updateSliderPosition(); }
-        function updateSliderPosition() { track.style.transform = `translateX(-${currentSlide * 100}%)`; }
+        function updateSliderPosition() { if(track) track.style.transform = `translateX(-${currentSlide * 100}%)`; }
 
         window.addEventListener('click', (e) => {
             if(e.target === modal) closeModal();
