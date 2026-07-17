@@ -86,7 +86,39 @@
 
         .nav-buttons { display: flex; gap: 20px; align-items: center; }
 
-        /* Кнопки с неоновым поведением */
+        /* Кнопка профиля в шапке с аватаркой */
+        .profile-nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 6px 16px 6px 6px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .profile-nav-btn:hover {
+            border-color: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.08);
+        }
+        .profile-nav-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .profile-nav-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Кнопки */
         .btn {
             padding: 12px 30px;
             border-radius: 8px;
@@ -125,6 +157,18 @@
             color: #fff;
             border-color: rgba(255,255,255,0.3);
             box-shadow: 0 0 35px rgba(255, 255, 255, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: rgba(255, 74, 74, 0.1);
+            border: 1px solid rgba(255, 74, 74, 0.3);
+            color: #ff4a4a;
+        }
+        .btn-danger:hover {
+            background: #ff4a4a;
+            color: #fff;
+            box-shadow: 0 0 25px rgba(255, 74, 74, 0.4);
             transform: translateY(-2px);
         }
 
@@ -463,6 +507,85 @@
         }
         .link-accent:hover::after { width: 100%; }
 
+        /* ИНТЕРФЕЙС ЛИЧНОГО КАБИНЕТА */
+        .profile-container {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 40px;
+            text-align: left;
+        }
+        .profile-sidebar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-right: 1px solid var(--card-border);
+            padding-right: 30px;
+        }
+        .profile-avatar-wrapper {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            margin-bottom: 20px;
+        }
+        .profile-main-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        .avatar-upload-label {
+            position: absolute;
+            bottom: 0; right: 0;
+            background: #fff; color: #000;
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 0.9rem; font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            transition: transform 0.2s;
+        }
+        .avatar-upload-label:hover { transform: scale(1.1); }
+        .profile-balance-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--card-border);
+            padding: 15px;
+            width: 100%;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .balance-val {
+            font-size: 1.4rem; font-weight: 800; color: #fff; margin-top: 5px;
+        }
+        .profile-main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .item-row {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--card-border);
+            padding: 14px 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-status {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+            font-weight: 600;
+        }
+
         /* Подвал */
         footer {
             background: #010101;
@@ -520,7 +643,6 @@
             animation: slideOut 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        /* Разные стили тостов */
         .toast-success {
             border-left: 4px solid #ffffff;
             box-shadow: 0 15px 35px rgba(0,0,0,0.6), 0 0 20px rgba(255, 255, 255, 0.15);
@@ -531,28 +653,17 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.6), 0 0 20px rgba(255, 74, 74, 0.15);
         }
 
-        @keyframes slideIn {
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
+        @keyframes slideIn { to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideOut { to { transform: translateY(40px) scale(0.95); opacity: 0; } }
 
-        @keyframes slideOut {
-            to {
-                transform: translateY(40px) scale(0.95);
-                opacity: 0;
-            }
-        }
-
-        /* Мобильная адаптивность */
         @media (max-width: 768px) {
             .hero h1 { font-size: 3.5rem; letter-spacing: 10px; }
             header { padding: 20px; }
             .section { padding: 80px 20px; }
             .modal-body { padding: 25px; }
-            .contacts-grid { flex-direction: column; gap: 12px; }
             .price-card { padding: 35px 25px; }
+            .profile-container { grid-template-columns: 1fr; gap: 20px; }
+            .profile-sidebar { border-right: none; padding-right: 0; border-bottom: 1px solid var(--card-border); padding-bottom: 20px; }
             #toastContainer { right: 20px; bottom: 20px; left: 20px; max-width: calc(100% - 40px); }
         }
     </style>
@@ -565,9 +676,9 @@
             <img src="logo.png" alt="" class="logo-img" onerror="this.style.display='none'">
             <span class="logo-text">ILLUSION</span>
         </div>
-        <div class="nav-buttons">
-            <button class="btn btn-outline" onclick="handleBuyClick()">Купить</button>
-            <button class="btn btn-white" id="navAuthBtn" onclick="openAuthModal()">Войти</button>
+        <div class="nav-buttons" id="headerAuthBlock">
+            <!-- Динамически меняется на Войти или Профиль -->
+            <button class="btn btn-white" onclick="openAuthModal()">Войти</button>
         </div>
     </header>
 
@@ -668,6 +779,60 @@
         </div>
     </div>
 
+    <!-- Модальное окно: Личный Кабинет / Профиль -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content" style="max-width: 750px; padding: 40px;">
+            <span class="close-modal" onclick="closeProfileModal()">&times;</span>
+            <h3 class="modal-desc-title" style="margin-bottom: 30px; text-align: left;">Личный Кабинет</h3>
+            
+            <div class="profile-container">
+                <!-- Сайдбар: Аватарка и Баланс -->
+                <div class="profile-sidebar">
+                    <div class="profile-avatar-wrapper">
+                        <img id="profileMainAvatar" src="" class="profile-main-avatar" alt="Аватар">
+                        <label for="avatarUrlInput" class="avatar-upload-label" onclick="changeAvatarPrompt(event)">✎</label>
+                    </div>
+                    <div class="profile-balance-card">
+                        <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px;">Ваш баланс</div>
+                        <div class="balance-val" id="profileBalance">0 ₽</div>
+                    </div>
+                    <button class="btn btn-danger" style="width: 100%; margin-top: 30px; padding: 10px;" onclick="logOut()">Выйти</button>
+                </div>
+
+                <!-- Основная инфа: Настройки и вещи -->
+                <div class="profile-main-content">
+                    <div>
+                        <div style="font-weight: 800; font-size: 0.85rem; letter-spacing: 1px; color: #666; margin-bottom: 15px; text-transform: uppercase;">Настройки аккаунта</div>
+                        
+                        <div class="form-group">
+                            <label>Никнейм / Логин</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="text" id="profileNameInput" class="form-input">
+                                <button class="btn btn-white" style="padding: 0 20px;" onclick="updateProfileName()">Ок</button>
+                            </div>
+                        </div>
+
+                        <div id="passwordChangeBlock" class="form-group" style="display: none;">
+                            <label>Новый пароль</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="password" id="profilePasswordInput" class="form-input" placeholder="Минимум 6 символов">
+                                <button class="btn btn-white" style="padding: 0 20px;" onclick="updateProfilePassword()">Изменить</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="font-weight: 800; font-size: 0.85rem; letter-spacing: 1px; color: #666; margin-bottom: 10px; text-transform: uppercase;">Мои товары</div>
+                        <div class="items-list" id="profileItemsList">
+                            <!-- Сюда прилетают купленные подписки -->
+                            <div style="color:#444; font-size:0.9rem;">Список пуст</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Модальное окно: Авторизация (Вход) -->
     <div class="modal" id="authModal">
         <div class="modal-content modal-content-sm" style="text-align: center;">
@@ -686,7 +851,6 @@
             
             <button class="btn btn-white" style="width: 100%; margin-top: 10px;" onclick="submitAuth()">Продолжить</button>
             
-            <!-- КНОПКА АВТОРИЗАЦИИ ЧЕРЕЗ GOOGLE -->
             <button class="btn btn-outline" style="width: 100%; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 10px;" onclick="signInWithGoogle()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                 Войти через Google
@@ -742,9 +906,10 @@
     <!-- Подключаем Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // КОНФИГ ТВОЕГО ПРОЕКТА
+        // ТВОЙ КОНФИГ FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDCLPh1Gcxe97UUxiLZFB-CrSnZd24y0Bs",
             authDomain: "illusion-stacks.firebaseapp.com",
@@ -754,12 +919,14 @@
             appId: "1:475141325383:web:f159aa59ff385f6ce5a762"
         };
 
-        // Инициализируем Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
 
-        // Функция показа уведомлений (Toasts)
+        const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23222'/><circle cx='50' cy='35' r='18' fill='%23888'/><path d='M15 85 C15 60, 85 60, 85 85' fill='%23888'/></svg>";
+
+        // Уведомления
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -772,122 +939,239 @@
             }, 3500);
         }
 
-        // Следим за состоянием авторизации
-        onAuthStateChanged(auth, (user) => {
-            const navBtn = document.getElementById('navAuthBtn');
-            if (user) {
-                // Если зашел через Google, берем красивое имя, если обычный логин — имя до @
-                const username = user.displayName ? user.displayName : user.email.split('@')[0];
-                navBtn.innerText = username;
-                navBtn.onclick = () => {
-                    if(confirm("Вы хотите выйти из аккаунта?")) {
-                        signOut(auth).then(() => {
-                            showToast("Вы успешно вышли.", "success");
-                        });
-                    }
-                };
+        // Проверка и инициализация данных юзера в Firestore
+        async function syncUserData(user) {
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+
+            let baseName = user.displayName || user.email.split('@')[0];
+            let baseAvatar = user.photoURL || defaultAvatar;
+
+            if (!userSnap.exists()) {
+                // Если юзера нет в БД, создаем стартовую анкету
+                await setDoc(userRef, {
+                    uid: user.uid,
+                    username: baseName,
+                    avatarUrl: baseAvatar,
+                    balance: 0,
+                    items: []
+                });
+                return { username: baseName, avatarUrl: baseAvatar, balance: 0, items: [] };
             } else {
-                navBtn.innerText = "Войти";
-                navBtn.onclick = openAuthModal;
+                return userSnap.data();
+            }
+        }
+
+        // Обновление кнопок в шапке
+        function renderHeaderBlock(userData) {
+            const block = document.getElementById('headerAuthBlock');
+            if (userData) {
+                block.innerHTML = `
+                    <div class="profile-nav-btn" onclick="openProfileModal()">
+                        <img class="profile-nav-avatar" src="${userData.avatarUrl}" onerror="this.src='${defaultAvatar}'">
+                        <span class="profile-nav-name">${userData.username}</span>
+                    </div>
+                `;
+            } else {
+                block.innerHTML = `<button class="btn btn-white" onclick="openAuthModal()">Войти</button>`;
+            }
+        }
+
+        // Рендеринг данных внутри модалки ЛК
+        function renderProfileModalData(userData) {
+            if (!userData) return;
+            document.getElementById('profileMainAvatar').src = userData.avatarUrl;
+            document.getElementById('profileBalance').innerText = `${userData.balance} ₽`;
+            document.getElementById('profileNameInput').value = userData.username;
+
+            // Показываем/скрываем смену пароля (только для зашедших по логину/паролю)
+            const isGoogle = auth.currentUser.providerData.some(p => p.providerId === 'google.com');
+            document.getElementById('passwordChangeBlock').style.display = isGoogle ? 'none' : 'block';
+
+            // Выводим товары
+            const itemsList = document.getElementById('profileItemsList');
+            if (userData.items && userData.items.length > 0) {
+                itemsList.innerHTML = userData.items.map(item => `
+                    <div class="item-row">
+                        <span style="font-weight:600;">${item.name}</span>
+                        <span class="item-status">${item.status || 'Активна'}</span>
+                    </div>
+                `).join('');
+            } else {
+                itemsList.innerHTML = `<div style="color:#444; font-size:0.9rem;">У вас пока нет купленных лицензий</div>`;
+            }
+        }
+
+        // Слушатель авторизации
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const data = await syncUserData(user);
+                renderHeaderBlock(data);
+                renderProfileModalData(data);
+            } else {
+                renderHeaderBlock(null);
             }
         });
 
-        // Кнопка покупки
-        window.handleBuyClick = function() {
+        // Смена никнейма
+        window.updateProfileName = async function() {
+            const newName = document.getElementById('profileNameInput').value.trim();
+            if(!newName) return showToast("Ник не может быть пустым!", "error");
+
+            try {
+                await updateProfile(auth.currentUser, { displayName: newName });
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { username: newName });
+                showToast("Никнейм успешно изменен!", "success");
+                
+                // Перерисовываем
+                const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+                renderHeaderBlock(snap.data());
+            } catch(e) { showToast("Ошибка обновления ника", "error"); }
+        }
+
+        // Смена аватарки по ссылке
+        window.changeAvatarPrompt = async function(e) {
+            e.preventDefault();
+            const url = prompt("Вставьте прямую ссылку на изображение для аватарки:");
+            if (url === null) return;
+            if (!url.trim()) return showToast("Ссылка пустая!", "error");
+
+            try {
+                await updateProfile(auth.currentUser, { photoURL: url });
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { avatarUrl: url });
+                showToast("Аватар обновлен!", "success");
+
+                document.getElementById('profileMainAvatar').src = url;
+                const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+                renderHeaderBlock(snap.data());
+            } catch(err) { showToast("Не удалось обновить аватар", "error"); }
+        }
+
+        // Смена пароля
+        window.updateProfilePassword = async function() {
+            const newPass = document.getElementById('profilePasswordInput').value.trim();
+            if(newPass.length < 6) return showToast("Пароль должен быть от 6 символов!", "error");
+
+            try {
+                await updatePassword(auth.currentUser, newPass);
+                showToast("Пароль успешно изменен!", "success");
+                document.getElementById('profilePasswordInput').value = "";
+            } catch(e) {
+                showToast("Ошибка. Попробуйте перезайти в аккаунт и повторить.", "error");
+            }
+        }
+
+        // Выход
+        window.logOut = function() {
+            if(confirm("Вы уверены, что хотите выйти?")) {
+                signOut(auth).then(() => {
+                    closeProfileModal();
+                    showToast("Вы вышли из системы.", "success");
+                });
+            }
+        }
+
+        // Купить товар
+        window.handleBuyClick = async function() {
             if (!auth.currentUser) {
                 showToast('Пожалуйста, авторизуйтесь для покупки', 'error');
                 openAuthModal();
-            } else {
-                showToast('Платежная система настраивается. Ожидайте активации шлюза.', 'success');
-            }
-        }
-
-        // ВХОД ЧЕРЕЗ GOOGLE
-// ВХОД ЧЕРЕЗ GOOGLE С ИСПРАВЛЕННЫМ ВЫВОДОМ ОШИБОК
-window.signInWithGoogle = async function() {
-    try {
-        const result = await signInWithPopup(auth, googleProvider);
-        showToast(`Добро пожаловать, ${result.user.displayName}!`, "success");
-        closeAuthModal();
-    } catch (error) {
-        console.error(error);
-        // Выводим точную причину прямо на экран мобильного
-        if (error.code === 'auth/popup-blocked') {
-            showToast("Окно заблокировано браузером! Разрешите всплывающие окна.", "error");
-        } else if (error.code === 'auth/operation-not-allowed') {
-            showToast("Ошибка: Google-вход не активирован в Firebase (нажми Save!)", "error");
-        } else if (error.code === 'auth/unauthorized-domain') {
-            showToast("Ошибка: Этот домен не добавлен в Authorized Domains в Firebase!", "error");
-        } else {
-            // Если ошибка какая-то другая, выводим её системное имя
-            showToast(`Ошибка: ${error.code || error.message}`, "error");
-        }
-    }
-}
-
-
-        // РЕГИСТРАЦИЯ
-        window.startRegistration = async function() {
-            const loginVal = document.getElementById('regLogin').value.trim();
-            const password = document.getElementById('regPassword').value.trim();
-
-            if (!loginVal || !password) {
-                showToast("Заполните все поля!", "error");
                 return;
             }
 
-            const email = loginVal.includes('@') ? loginVal : `${loginVal}@mysite.com`;
+            // Эмуляция покупки: проверяем баланс юзера в Firestore
+            const ref = doc(db, "users", auth.currentUser.uid);
+            const snap = await getDoc(ref);
+            const data = snap.data();
 
+            if (data.balance >= 500) {
+                let currentItems = data.items || [];
+                currentItems.push({ name: "ILLUSION PRO", status: "Активна" });
+                
+                await updateDoc(ref, {
+                    balance: data.balance - 500,
+                    items: currentItems
+                });
+
+                showToast("Успешная покупка тарифа ILLUSION PRO!", "success");
+                renderProfileModalData({ ...data, balance: data.balance - 500, items: currentItems });
+            } else {
+                showToast('Недостаточно средств. Платежный шлюз настраивается.', 'error');
+            }
+        }
+
+        // Авторизация Google
+        window.signInWithGoogle = async function() {
+            try {
+                await signInWithPopup(auth, googleProvider);
+                showToast("Успешный вход!", "success");
+                closeAuthModal();
+            } catch (error) {
+                if (error.code === 'auth/unauthorized-domain') {
+                    showToast("Ошибка: Домен не добавлен в список разрешенных!", "error");
+                } else {
+                    showToast(`Ошибка: ${error.code}`, "error");
+                }
+            }
+        }
+
+        // Логин по паролю
+        window.submitAuth = async function() {
+            const loginVal = document.getElementById('authLogin').value.trim();
+            const password = document.getElementById('authPassword').value.trim();
+            if (!loginVal || !password) return showToast("Введите логин и пароль!", "error");
+
+            const email = loginVal.includes('@') ? loginVal : `${loginVal}@mysite.com`;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showToast("Вы успешно вошли!", "success");
+                closeAuthModal();
+            } catch (error) { showToast("Неверный логин или пароль!", "error"); }
+        }
+
+        // Регистрация
+        window.startRegistration = async function() {
+            const loginVal = document.getElementById('regLogin').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            if (!loginVal || !password) return showToast("Заполните все поля!", "error");
+
+            const email = loginVal.includes('@') ? loginVal : `${loginVal}@mysite.com`;
             try {
                 await createUserWithEmailAndPassword(auth, email, password);
                 showToast("Регистрация успешна!", "success");
                 closeRegModal();
             } catch (error) {
-                console.error(error);
-                if (error.code === 'auth/email-already-in-use') {
-                    showToast("Этот логин уже занят!", "error");
-                } else if (error.code === 'auth/weak-password') {
-                    showToast("Пароль должен быть минимум 6 символов!", "error");
-                } else {
-                    showToast("Ошибка регистрации. Попробуйте еще раз.", "error");
-                }
+                if (error.code === 'auth/email-already-in-use') showToast("Этот логин занят!", "error");
+                else showToast("Ошибка при создании аккаунта", "error");
             }
         }
 
-        // АВТОРИЗАЦИЯ (ВХОД)
-        window.submitAuth = async function() {
-            const loginVal = document.getElementById('authLogin').value.trim();
-            const password = document.getElementById('authPassword').value.trim();
-
-            if (!loginVal || !password) {
-                showToast("Введите логин и пароль!", "error");
-                return;
-            }
-
-            const email = loginVal.includes('@') ? loginVal : `${loginVal}@mysite.com`;
-
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                showToast("Успешный вход в систему!", "success");
-                closeAuthModal();
-            } catch (error) {
-                showToast("Неверный логин или пароль!", "error");
-            }
-        }
-
-        // Логика работы модалок и слайдера
+        // Интерфейсные окна (Модалки)
         const modal = document.getElementById('detailsModal');
         const authModal = document.getElementById('authModal');
         const regModal = document.getElementById('regModal');
+        const profileModal = document.getElementById('profileModal');
         const track = document.getElementById('sliderTrack');
         let currentSlide = 0;
 
         window.openModal = () => { modal.classList.add('active'); document.body.style.overflow = 'hidden'; updateSliderPosition(); }
         window.closeModal = () => { modal.classList.remove('active'); document.body.style.overflow = 'auto'; }
-        window.openAuthModal = () => { closeModal(); closeRegModal(); authModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+        window.openAuthModal = () => { closeModal(); closeRegModal(); closeProfileModal(); authModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
         window.closeAuthModal = () => { authModal.classList.remove('active'); document.body.style.overflow = 'auto'; }
-        window.openRegModal = () => { closeModal(); closeAuthModal(); regModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+        window.openRegModal = () => { closeModal(); closeAuthModal(); closeProfileModal(); regModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
         window.closeRegModal = () => { regModal.classList.remove('active'); document.body.style.overflow = 'auto'; }
+        
+        window.openProfileModal = async () => { 
+            closeModal(); closeAuthModal(); closeRegModal(); 
+            if(auth.currentUser) {
+                const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+                renderProfileModalData(snap.data());
+            }
+            profileModal.classList.add('active'); 
+            document.body.style.overflow = 'hidden'; 
+        }
+        window.closeProfileModal = () => { profileModal.classList.remove('active'); document.body.style.overflow = 'auto'; }
+
         window.switchToReg = () => { openRegModal(); }
         window.switchToAuth = () => { openAuthModal(); }
         window.moveSlide = (direction) => { currentSlide = (currentSlide + direction + 4) % 4; updateSliderPosition(); }
@@ -897,6 +1181,7 @@ window.signInWithGoogle = async function() {
             if(e.target === modal) closeModal();
             if(e.target === authModal) closeAuthModal();
             if(e.target === regModal) closeRegModal();
+            if(e.target === profileModal) closeProfileModal();
         });
     </script>
 </body>
