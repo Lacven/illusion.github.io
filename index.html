@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Illusion Stacks</title>
     <style>
-        /* Базовые стили для демонстрации структуры и всплывающих уведомлений */
         :root {
             --bg-color: #0b0b0b;
             --card-bg: #161616;
@@ -35,7 +34,6 @@
         .btn-blue { background-color: var(--accent-color); color: #fff; }
         .btn-white { background-color: #fff; color: #000; }
         
-        /* Модальные окна */
         .modal {
             display: none;
             position: fixed;
@@ -71,7 +69,6 @@
             box-sizing: border-box;
         }
 
-        /* Навигация профиля */
         .profile-nav-btn {
             display: flex;
             align-items: center;
@@ -84,13 +81,11 @@
         .profile-nav-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
         .profile-avatar-large { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; cursor: pointer; }
 
-        /* Слайдер / Контент */
         .main-content { padding: 40px; text-align: center; }
         .slider-container { overflow: hidden; max-width: 600px; margin: 20px auto; position: relative; }
         .slider-track { display: flex; transition: transform 0.4s ease; }
         .slide { min-width: 100%; box-sizing: border-box; padding: 40px; background: var(--card-bg); border-radius: 12px; }
 
-        /* Трей-уведомления (Toasts) */
         #toastContainer {
             position: fixed;
             bottom: 20px;
@@ -118,35 +113,30 @@
 </head>
 <body>
 
-    <!-- ШАПКА САЙТА -->
     <header>
         <div class="logo" style="font-size: 1.5rem; font-weight: bold;">ILLUSION</div>
-        <!-- Динамический блок авторизации -->
         <div id="headerAuthBlock">
             <button class="btn btn-white" onclick="openAuthModal()">Войти</button>
         </div>
     </header>
 
-    <!-- ГЛАВНЫЙ КОНТЕНТ И КНОПКА ПОКУПКИ -->
     <main class="main-content">
         <h1>Лицензия ILLUSION PRO</h1>
         <p>Получите полный доступ к функционалу всего за 500 ₽</p>
         <button class="btn btn-blue" style="font-size: 1.2rem; padding: 15px 40px;" onclick="handleBuyClick()">Купить сейчас</button>
-        
         <br><br>
         <button class="btn" onclick="openModal()">Открыть инфо-слайдер</button>
     </main>
 
-    <!-- МОДАЛКА 1: ИНФО-СЛАЙДЕР -->
     <div id="detailsModal" class="modal">
         <div class="modal-content" style="max-width: 600px;">
             <span class="close-btn" onclick="closeModal()">&times;</span>
             <div class="slider-container">
                 <div id="sliderTrack" class="slider-track">
-                    <div class="slide"><h3>Преимущество 1</h3><p>Высокая скорость работы скриптов.</p></div>
-                    <div class="slide"><h3>Преимущество 2</h3><p>Полная автоматизация процессов.</p></div>
-                    <div class="slide"><h3>Преимущество 3</h3><p>Удобный и понятный интерфейс.</p></div>
-                    <div class="slide"><h3>Преимущество 4</h3><p>Поддержка пользователей 24/7.</p></div>
+                    <div class="slide"><h3>Преимущество 1</h3><p>Высокая скорость работы.</p></div>
+                    <div class="slide"><h3>Преимущество 2</h3><p>Полная автоматизация.</p></div>
+                    <div class="slide"><h3>Преимущество 3</h3><p>Удобный интерфейс.</p></div>
+                    <div class="slide"><h3>Преимущество 4</h3><p>Поддержка 24/7.</p></div>
                 </div>
             </div>
             <div style="display: flex; justify-content: space-between; margin-top: 15px;">
@@ -156,7 +146,6 @@
         </div>
     </div>
 
-    <!-- МОДАЛКА 2: ВХОД -->
     <div id="authModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeAuthModal()">&times;</span>
@@ -175,7 +164,6 @@
         </div>
     </div>
 
-    <!-- МОДАЛКА 3: РЕГИСТРАЦИЯ -->
     <div id="regModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeRegModal()">&times;</span>
@@ -193,19 +181,15 @@
         </div>
     </div>
 
-    <!-- МОДАЛКА 4: ЛИЧНЫЙ КАБИНЕТ (ПРОФИЛЬ) -->
     <div id="profileModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeProfileModal()">&times;</span>
             <h2>Личный кабинет</h2>
             <div style="text-align: center;">
-                <img id="profileMainAvatar" class="profile-avatar-large" src="" onclick="changeAvatarPrompt(event)" title="Нажмите, чтобы изменить аватар">
-                <div style="font-size: 0.9rem; color: #aaa; margin-top: -10px; margin-bottom: 15px;">Нажмите на фото для смены ссылки</div>
+                <img id="profileMainAvatar" class="profile-avatar-large" src="" onclick="changeAvatarPrompt(event)">
                 <div style="font-size: 1.2rem; margin-bottom: 5px;">Баланс: <strong id="profileBalance" style="color:#10b981;">0 ₽</strong></div>
             </div>
-            
             <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
-
             <div class="form-group">
                 <label>Ваш никнейм</label>
                 <div style="display:flex; gap:10px;">
@@ -213,7 +197,6 @@
                     <button class="btn btn-blue" onclick="updateProfileName()">Save</button>
                 </div>
             </div>
-
             <div id="passwordChangeBlock" class="form-group">
                 <label>Новый пароль</label>
                 <div style="display:flex; gap:10px;">
@@ -221,26 +204,19 @@
                     <button class="btn btn-blue" onclick="updateProfilePassword()">Изменить</button>
                 </div>
             </div>
-
             <h3>Ваши лицензии:</h3>
-            <div id="profileItemsList" style="background:#222; padding:10px; border-radius:6px; max-height:120px; overflow-y:auto;">
-                <!-- Сюда добавляются купленные лицензии -->
-            </div>
-
-            <button class="btn btn-white" style="width: 100%; margin-top: 20px; background:#ef4444; color:#fff;" onclick="logOut()">Выйти из аккаунта</button>
+            <div id="profileItemsList" style="background:#222; padding:10px; border-radius:6px; max-height:120px; overflow-y:auto;"></div>
+            <button class="btn btn-white" style="width: 100%; margin-top: 20px; background:#ef4444; color:#fff;" onclick="logOut()">Выйти</button>
         </div>
     </div>
 
-    <!-- Контейнер для всплывающих уведомлений -->
     <div id="toastContainer"></div>
 
-    <!-- FIREBASE СДК И ЛОГИКА ПРИЛОЖЕНИЯ -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // ТВОЙ КОНФИГ FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDCLPh1Gcxe97UUxiLZFB-CrSnZd24y0Bs",
             authDomain: "illusion-stacks.firebaseapp.com",
@@ -257,7 +233,6 @@
 
         const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23222'/><circle cx='50' cy='35' r='18' fill='%23888'/><path d='M15 85 C15 60, 85 60, 85 85' fill='%23888'/></svg>";
 
-        // Глобальная функция для уведомлений
         window.showToast = function(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             if (!container) return;
@@ -271,7 +246,6 @@
             }, 3500);
         }
 
-        // Синхронизация данных пользователя с Firestore + Защита от отсутствующей БД
         async function syncUserData(user) {
             let baseName = user.displayName || user.email.split('@')[0];
             let baseAvatar = user.photoURL || defaultAvatar;
@@ -288,17 +262,14 @@
                     return userSnap.data();
                 }
             } catch (error) {
-                console.error("Ошибка Firestore:", error);
-                showToast("Предупреждение: База данных в Firebase не создана или закрыты правила доступа!", "error");
-                return fallbackData; // Возвращаем локальный объект, чтобы интерфейс не зависал
+                console.error(error);
+                return fallbackData;
             }
         }
 
-        // Обновление кнопок в шапке (Вход / Профиль)
         function renderHeaderBlock(userData) {
             const block = document.getElementById('headerAuthBlock');
             if (!block) return;
-            
             if (userData) {
                 block.innerHTML = `
                     <div class="profile-nav-btn" onclick="openProfileModal()">
@@ -311,7 +282,6 @@
             }
         }
 
-        // Рендеринг данных внутри модалки ЛК
         function renderProfileModalData(userData) {
             if (!userData) return;
             if (document.getElementById('profileMainAvatar')) document.getElementById('profileMainAvatar').src = userData.avatarUrl;
@@ -327,9 +297,9 @@
             if (itemsList) {
                 if (userData.items && userData.items.length > 0) {
                     itemsList.innerHTML = userData.items.map(item => `
-                        <div class="item-row" style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.95rem;">
-                            <span style="font-weight:600; color:#fff;">${item.name}</span>
-                            <span class="item-status" style="color:#10b981;">${item.status || 'Активна'}</span>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <span style="font-weight:600;">${item.name}</span>
+                            <span style="color:#10b981;">${item.status || 'Активна'}</span>
                         </div>
                     `).join('');
                 } else {
@@ -338,7 +308,6 @@
             }
         }
 
-        // Главный слушатель авторизации
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const data = await syncUserData(user);
@@ -349,14 +318,37 @@
             }
         });
 
-        // КНОПКА КУПИТЬ: Теперь строго реагирует на неавторизованных пользователей
+        // РЕГИСТРАЦИЯ: Теперь ПРИНУДИТЕЛЬНО пишет в базу данных сразу
+        window.startRegistration = async function() {
+            const loginVal = document.getElementById('regLogin').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            if (!loginVal || !password) return showToast("Заполните все поля!", "error");
+            if (password.length < 6) return showToast("Пароль должен быть от 6 символов!", "error");
+
+            const email = loginVal.includes('@') ? loginVal : `${loginVal}@illusionmail.com`;
+            try {
+                const credential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = credential.user;
+                
+                // Сразу же создаем документ в Firestore
+                const newProfileData = { username: loginVal, avatarUrl: defaultAvatar, balance: 0, items: [] };
+                await setDoc(doc(db, "users", user.uid), newProfileData);
+
+                showToast("Регистрация успешна!", "success");
+                closeRegModal();
+            } catch (error) {
+                console.error(error);
+                if (error.code === 'auth/email-already-in-use') showToast("Этот логин уже занят!", "error");
+                else showToast(`Ошибка регистрации: ${error.code}`, "error");
+            }
+        }
+
         window.handleBuyClick = async function() {
             if (!auth.currentUser) {
                 showToast('Ошибка: Авторизуйтесь, чтобы совершить покупку!', 'error');
                 openAuthModal();
                 return;
             }
-
             try {
                 const ref = doc(db, "users", auth.currentUser.uid);
                 const snap = await getDoc(ref);
@@ -366,42 +358,30 @@
                     let currentItems = data.items || [];
                     currentItems.push({ name: "ILLUSION PRO", status: "Активна" });
                     
-                    await updateDoc(ref, {
-                        balance: data.balance - 500,
-                        items: currentItems
-                    });
-
+                    await updateDoc(ref, { balance: data.balance - 500, items: currentItems });
                     showToast("Успешная покупка тарифа ILLUSION PRO!", "success");
-                    renderProfileModalData({ ...data, balance: data.balance - 500, items: currentItems });
                     
-                    // Обновляем шапку
-                    renderHeaderBlock({ ...data, balance: data.balance - 500, items: currentItems });
+                    const updated = { ...data, balance: data.balance - 500, items: currentItems };
+                    renderProfileModalData(updated);
+                    renderHeaderBlock(updated);
                 } else {
-                    showToast('Недостаточно средств на балансе! Пожалуйста, пополните счет.', 'error');
+                    showToast('Недостаточно средств на балансе!', 'error');
                 }
             } catch (e) {
-                console.error(e);
-                showToast('Ошибка транзакции. Убедитесь, что база данных Firestore создана в панели Firebase!', 'error');
+                showToast('Ошибка транзакции.', 'error');
             }
         }
 
-        // Вход через Google
         window.signInWithGoogle = async function() {
             try {
                 await signInWithPopup(auth, googleProvider);
                 showToast("Успешный вход через Google!", "success");
                 closeAuthModal();
             } catch (error) {
-                console.error(error);
-                if (error.code === 'auth/unauthorized-domain') {
-                    showToast("Ошибка: Домен не добавлен в Authorized Domains в Firebase!", "error");
-                } else {
-                    showToast(`Ошибка входа: ${error.code || error.message}`, "error");
-                }
+                showToast("Ошибка входа через Google", "error");
             }
         }
 
-        // Логин по паролю
         window.submitAuth = async function() {
             const loginVal = document.getElementById('authLogin').value.trim();
             const password = document.getElementById('authPassword').value.trim();
@@ -413,84 +393,47 @@
                 showToast("Вы успешно вошли!", "success");
                 closeAuthModal();
             } catch (error) { 
-                console.error(error);
                 showToast("Неверный логин или пароль!", "error"); 
             }
         }
 
-        // Регистрация
-        window.startRegistration = async function() {
-            const loginVal = document.getElementById('regLogin').value.trim();
-            const password = document.getElementById('regPassword').value.trim();
-            if (!loginVal || !password) return showToast("Заполните все поля!", "error");
-            if (password.length < 6) return showToast("Пароль должен быть от 6 символов!", "error");
-
-            const email = loginVal.includes('@') ? loginVal : `${loginVal}@illusionmail.com`;
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                showToast("Регистрация успешна!", "success");
-                closeRegModal();
-            } catch (error) {
-                console.error(error);
-                if (error.code === 'auth/email-already-in-use') showToast("Этот логин уже занят!", "error");
-                else showToast(`Ошибка регистрации: ${error.code}`, "error");
-            }
-        }
-
-        // Смена никнейма
         window.updateProfileName = async function() {
             const newName = document.getElementById('profileNameInput').value.trim();
             if(!newName) return showToast("Ник не может быть пустым!", "error");
-
             try {
                 await updateProfile(auth.currentUser, { displayName: newName });
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { username: newName });
-                showToast("Никнейм успешно изменен!", "success");
-                
-                const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
-                renderHeaderBlock(snap.data());
-            } catch(e) { showToast("Ошибка изменения имени в БД", "error"); }
+                showToast("Никнейм изменен!", "success");
+                renderHeaderBlock({ username: newName, avatarUrl: document.getElementById('profileMainAvatar').src });
+            } catch(e) { showToast("Ошибка изменения имени", "error"); }
         }
 
-        // Смена аватарки (через prompt URL)
         window.changeAvatarPrompt = async function(e) {
             e.preventDefault();
-            const url = prompt("Вставьте прямую ссылку на новую аватарку (jpg/png):");
-            if (url === null) return;
-            if (!url.trim()) return showToast("Ссылка не может быть пустой!", "error");
-
+            const url = prompt("Вставьте ссылку на аватарку:");
+            if (!url || !url.trim()) return;
             try {
                 await updateProfile(auth.currentUser, { photoURL: url });
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { avatarUrl: url });
-                showToast("Аватар обновлен!", "success");
-
                 document.getElementById('profileMainAvatar').src = url;
-                const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
-                renderHeaderBlock(snap.data());
-            } catch(err) { showToast("Не удалось сохранить аватар", "error"); }
+                showToast("Аватар обновлен!", "success");
+            } catch(err) { showToast("Ошибка обновления аватара", "error"); }
         }
 
-        // Смена пароля
         window.updateProfilePassword = async function() {
             const newPass = document.getElementById('profilePasswordInput').value.trim();
-            if(newPass.length < 6) return showToast("Пароль должен быть от 6 символов!", "error");
-
+            if(newPass.length < 6) return showToast("Пароль от 6 символов!", "error");
             try {
                 await updatePassword(auth.currentUser, newPass);
-                showToast("Пароль успешно изменен!", "success");
+                showToast("Пароль изменен!", "success");
                 document.getElementById('profilePasswordInput').value = "";
-            } catch(e) { showToast("Ошибка безопасности. Пожалуйста, перезайдите в аккаунт.", "error"); }
+            } catch(e) { showToast("Перезайдите в аккаунт для смены пароля", "error"); }
         }
 
-        // Выход из аккаунта
         window.logOut = function() {
-            signOut(auth).then(() => {
-                closeProfileModal();
-                showToast("Вы вышли из системы.", "success");
-            });
+            signOut(auth).then(() => { closeProfileModal(); showToast("Вы вышли.", "success"); });
         }
 
-        // Управление окнами интерфейса
         const modal = document.getElementById('detailsModal');
         const authModal = document.getElementById('authModal');
         const regModal = document.getElementById('regModal');
@@ -498,26 +441,21 @@
         const track = document.getElementById('sliderTrack');
         let currentSlide = 0;
 
-        window.openModal = () => { modal.classList.add('active'); document.body.style.overflow = 'hidden'; updateSliderPosition(); }
-        window.closeModal = () => { modal.classList.remove('active'); document.body.style.overflow = 'auto'; }
-        window.openAuthModal = () => { closeModal(); closeRegModal(); closeProfileModal(); authModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
-        window.closeAuthModal = () => { authModal.classList.remove('active'); document.body.style.overflow = 'auto'; }
-        window.openRegModal = () => { closeModal(); closeAuthModal(); closeProfileModal(); regModal.classList.add('active'); document.body.style.overflow = 'hidden'; }
-        window.closeRegModal = () => { regModal.classList.remove('active'); document.body.style.overflow = 'auto'; }
-        
+        window.openModal = () => { modal.classList.add('active'); updateSliderPosition(); }
+        window.closeModal = () => { modal.classList.remove('active'); }
+        window.openAuthModal = () => { closeModal(); closeRegModal(); closeProfileModal(); authModal.classList.add('active'); }
+        window.closeAuthModal = () => { authModal.classList.remove('active'); }
+        window.openRegModal = () => { closeModal(); closeAuthModal(); closeProfileModal(); regModal.classList.add('active'); }
+        window.closeRegModal = () => { regModal.classList.remove('active'); }
         window.openProfileModal = async () => { 
             closeModal(); closeAuthModal(); closeRegModal(); 
             if(auth.currentUser) {
-                try {
-                    const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
-                    if(snap.exists()) renderProfileModalData(snap.data());
-                } catch(e){}
+                const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+                if(snap.exists()) renderProfileModalData(snap.data());
             }
             profileModal.classList.add('active'); 
-            document.body.style.overflow = 'hidden'; 
         }
-        window.closeProfileModal = () => { profileModal.classList.remove('active'); document.body.style.overflow = 'auto'; }
-
+        window.closeProfileModal = () => { profileModal.classList.remove('active'); }
         window.switchToReg = () => { openRegModal(); }
         window.switchToAuth = () => { openAuthModal(); }
         window.moveSlide = (direction) => { currentSlide = (currentSlide + direction + 4) % 4; updateSliderPosition(); }
