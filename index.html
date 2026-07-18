@@ -81,7 +81,7 @@
             filter: drop-shadow(0 0 12px rgba(255,255,255,0.3));
         }
 
-        .nav-buttons { display: flex; gap: 20px; align-items: center; }
+        .nav-buttons { display: flex; gap: 15px; align-items: center; }
 
         .profile-nav-btn {
             display: flex;
@@ -112,6 +112,25 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+
+        .msg-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #fff;
+            color: #000;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+            animation: pulseBadge 2s infinite;
+        }
+        @keyframes pulseBadge {
+            0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
         }
 
         .btn {
@@ -419,6 +438,11 @@
             box-shadow: 0 0 15px rgba(255,255,255,0.05);
         }
 
+        select.form-input option {
+            background: #090909;
+            color: #fff;
+        }
+
         .slider-container {
             width: 100%; position: relative;
             aspect-ratio: 16/9; background: #000;
@@ -492,7 +516,7 @@
             background: rgba(255,255,255,0.02); border: 1px solid var(--card-border);
             padding: 15px; width: 100%; border-radius: 10px; text-align: center; margin-top: 10px;
         }
-        .balance-val { font-size: 1.4rem; font-weight: 800; color: #fff; margin-top: 5px; }
+        .balance-val { font-size: 1.4rem; font-weight: 800; color: #fff; margin-top: 5px; margin-bottom: 12px; }
         .profile-main-content { display: flex; flex-direction: column; gap: 30px; }
         .items-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
         .item-row {
@@ -509,6 +533,28 @@
             font-family: monospace; border: 1px solid rgba(255,255,255,0.1);
             color: #fff; letter-spacing: 1px; font-size: 1rem; margin-top: 5px; user-select: all;
         }
+
+        .message-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--card-border);
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+        .message-card.unread {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 15px rgba(255,255,255,0.05);
+        }
+        .message-card:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateY(-2px);
+        }
+        .msg-time { font-size: 0.75rem; color: #888; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
+        .msg-text { font-size: 0.95rem; line-height: 1.5; color: #eaeaea; }
 
         footer {
             background: #010101; border-top: 1px solid var(--card-border);
@@ -619,6 +665,7 @@
         </div>
     </section>
 
+    <!-- Модалки -->
     <div class="modal" id="detailsModal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -657,6 +704,52 @@
         </div>
     </div>
 
+    <!-- Модалка пополнения баланса -->
+    <div class="modal" id="topupModal">
+        <div class="modal-content modal-content-sm" style="text-align: center; max-width: 380px;">
+            <span class="close-modal" onclick="closeTopupModal()">&times;</span>
+            <h3 class="modal-desc-title" style="margin-bottom: 20px; font-size: 1.4rem;">Пополнение</h3>
+            <p style="font-size: 0.85rem; color: #888; margin-bottom: 25px;">Введите сумму для пополнения кошелька (от 100 до 10000 ₽).</p>
+            
+            <div class="form-group">
+                <input type="number" id="topupAmount" class="form-input" placeholder="Например: 500" min="100" max="10000">
+            </div>
+            
+            <button class="btn btn-white" style="width: 100%; margin-top: 10px;" onclick="processTopup()">Продолжить к оплате</button>
+        </div>
+    </div>
+
+    <!-- Модалка сообщений -->
+    <div class="modal" id="messagesModal">
+        <div class="modal-content" style="max-width: 600px; padding: 40px; min-height: 400px;">
+            <span class="close-modal" onclick="closeMessagesModal()">&times;</span>
+            <h3 class="modal-desc-title" style="margin-bottom: 30px; text-align: left;">Ваши сообщения</h3>
+            <div id="messagesList" style="display: flex; flex-direction: column; gap: 5px;">
+                <!-- Сообщения будут рендериться здесь -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка Админ панели -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content" style="max-width: 500px; padding: 40px;">
+            <span class="close-modal" onclick="closeAdminModal()">&times;</span>
+            <h3 class="modal-desc-title" style="margin-bottom: 20px; text-align: left; color: #ff4a4a;">Admin Panel</h3>
+            <p style="font-size: 0.85rem; color: #888; margin-bottom: 25px;">Отправка сообщений пользователям</p>
+            
+            <div class="form-group">
+                <label>Выберите пользователя</label>
+                <select id="adminUserSelect" class="form-input"></select>
+            </div>
+            <div class="form-group">
+                <label>Текст сообщения</label>
+                <textarea id="adminMessageText" class="form-input" rows="4" placeholder="Введите текст..."></textarea>
+            </div>
+            
+            <button class="btn btn-danger" style="width: 100%; margin-top: 10px;" onclick="adminSendMessage()">Отправить сообщение</button>
+        </div>
+    </div>
+
     <div class="modal" id="profileModal">
         <div class="modal-content" style="max-width: 750px; padding: 40px;">
             <span class="close-modal" onclick="closeProfileModal()">&times;</span>
@@ -671,8 +764,9 @@
                     <div class="profile-balance-card">
                         <div style="font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px;">Ваш баланс</div>
                         <div class="balance-val" id="profileBalance">0 ₽</div>
+                        <button class="btn btn-outline" style="width: 100%; padding: 8px; font-size: 0.85rem;" onclick="openTopupModal()">+ Пополнить</button>
                     </div>
-                    <button class="btn btn-danger" style="width: 100%; margin-top: 30px; padding: 10px;" onclick="logOut()">Выйти</button>
+                    <button class="btn btn-danger" style="width: 100%; margin-top: 20px; padding: 10px;" onclick="logOut()">Выйти</button>
                 </div>
 
                 <div class="profile-main-content">
@@ -777,9 +871,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, limit, getDocs, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, limit, getDocs, runTransaction, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // ТВОЙ КОНФИГ FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDCLPh1Gcxe97UUxiLZFB-CrSnZd24y0Bs",
             authDomain: "illusion-stacks.firebaseapp.com",
@@ -795,17 +888,29 @@
         const googleProvider = new GoogleAuthProvider();
 
         const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23222'/><circle cx='50' cy='35' r='18' fill='%23888'/><path d='M15 85 C15 60, 85 60, 85 85' fill='%23888'/></svg>";
+        const ADMIN_UID = "XSAYGYmgjYb1ZhfY41csHgH11nZ2";
+        let unsubMessages = null;
+        window.userMessages = [];
 
         window.showToast = showToast;
-        window.openModal = () => { document.getElementById('detailsModal').classList.add('active'); document.body.style.overflow = 'hidden'; updateSliderPosition(); }
+        window.openModal = () => { closeAllModals(); document.getElementById('detailsModal').classList.add('active'); document.body.style.overflow = 'hidden'; updateSliderPosition(); }
         window.closeModal = () => { document.getElementById('detailsModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
-        window.openAuthModal = () => { window.closeModal(); window.closeRegModal(); window.closeProfileModal(); document.getElementById('authModal').classList.add('active'); document.body.style.overflow = 'hidden'; }
+        window.openAuthModal = () => { closeAllModals(); document.getElementById('authModal').classList.add('active'); document.body.style.overflow = 'hidden'; }
         window.closeAuthModal = () => { document.getElementById('authModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
-        window.openRegModal = () => { window.closeModal(); window.closeAuthModal(); window.closeProfileModal(); document.getElementById('regModal').classList.add('active'); document.body.style.overflow = 'hidden'; }
+        window.openRegModal = () => { closeAllModals(); document.getElementById('regModal').classList.add('active'); document.body.style.overflow = 'hidden'; }
         window.closeRegModal = () => { document.getElementById('regModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
+        window.openTopupModal = () => { document.getElementById('topupModal').classList.add('active'); }
+        window.closeTopupModal = () => { document.getElementById('topupModal').classList.remove('active'); }
+        window.openMessagesModal = () => { closeAllModals(); document.getElementById('messagesModal').classList.add('active'); document.body.style.overflow = 'hidden'; renderMessages(); }
+        window.closeMessagesModal = () => { document.getElementById('messagesModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
         
-        window.openProfileModal = async () => { 
+        window.closeAllModals = () => {
             window.closeModal(); window.closeAuthModal(); window.closeRegModal(); 
+            window.closeProfileModal(); window.closeMessagesModal(); window.closeAdminModal();
+        }
+
+        window.openProfileModal = async () => { 
+            closeAllModals();
             if(auth.currentUser) {
                 const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
                 renderProfileModalData(snap.data());
@@ -833,11 +938,9 @@
             }, 3500);
         }
 
-                // БЕЗОПАСНАЯ ВЫДАЧА КЛЮЧА НАПРЯМУЮ ИЗ FIREBASE
         async function fetchAndAssignKey(userUid) {
             try {
                 const keysRef = collection(db, "hwid_keys");
-                // Ищем свободный ключ
                 const q = query(keysRef, where("used", "==", false), limit(1));
                 const querySnapshot = await getDocs(q);
 
@@ -852,41 +955,26 @@
                 const keyDocRef = doc(db, "hwid_keys", keyDoc.id);
                 const userRef = doc(db, "users", userUid);
 
-                // Запускаем транзакцию
                 await runTransaction(db, async (transaction) => {
                     const userSnap = await transaction.get(userRef);
-                    if (!userSnap.exists()) {
-                        throw "Ошибка профиля: документ юзера не найден в базе. Выйди из аккаунта и зайди снова!";
-                    }
+                    if (!userSnap.exists()) throw "Ошибка профиля: документ юзера не найден в базе.";
 
                     const userData = userSnap.data();
                     let currentItems = userData.items || [];
                     
-                    if (currentItems.some(i => i.name === "ILLUSION PRO")) {
-                        throw "У вас уже приобретен этот тариф!";
-                    }
+                    if (currentItems.some(i => i.name === "ILLUSION PRO")) throw "У вас уже приобретен этот тариф!";
 
-                    // 1. Помечаем ключ
                     transaction.update(keyDocRef, { used: true, assignedTo: userUid });
-                    
-                    // 2. Списываем баланс и выдаем товар
                     currentItems.push({ name: "ILLUSION PRO", status: "Активна" });
-                    transaction.update(userRef, {
-                        balance: userData.balance - 500,
-                        items: currentItems,
-                        userKey: keyString
-                    });
+                    transaction.update(userRef, { balance: userData.balance - 500, items: currentItems, userKey: keyString });
                 });
-
                 return keyString;
             } catch (error) {
-                // ВЫВОДИМ ТОЧНУЮ ОШИБКУ ПРЯМО НА ЭКРАН ТЕЛЕФОНА
                 let errorText = typeof error === 'string' ? error : (error.message || "Неизвестный сбой");
                 showToast("Сбой: " + errorText, "error");
                 return null;
             }
         }
-
 
         async function syncUserData(user) {
             const userRef = doc(db, "users", user.uid);
@@ -898,16 +986,76 @@
             if (!userSnap.exists()) {
                 const newData = { uid: user.uid, username: baseName, avatarUrl: baseAvatar, balance: 0, items: [], hwidLinked: false, userKey: "" };
                 await setDoc(userRef, newData);
+                
+                // Создаем приветственное сообщение
+                const msgRef = doc(collection(db, "users", user.uid, "messages"));
+                await setDoc(msgRef, {
+                    text: `Добро пожаловать в ILLUSION, ${baseName}! Ваш аккаунт успешно создан. В разделе "Личный кабинет" вы можете пополнить баланс и приобрести подписку.`,
+                    timestamp: new Date().getTime(),
+                    read: false
+                });
+
                 return newData;
             } else {
                 return userSnap.data();
             }
         }
 
+        function listenToMessages(uid) {
+            if (unsubMessages) unsubMessages();
+            const q = query(collection(db, "users", uid, "messages"), orderBy("timestamp", "desc"));
+            unsubMessages = onSnapshot(q, (snapshot) => {
+                let unreadCount = 0;
+                window.userMessages = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    data.id = doc.id;
+                    window.userMessages.push(data);
+                    if (!data.read) unreadCount++;
+                });
+                
+                const badge = document.getElementById('msgBadge');
+                if (badge) {
+                    badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+                    badge.innerText = unreadCount;
+                }
+                
+                if (document.getElementById('messagesModal').classList.contains('active')) {
+                    renderMessages();
+                }
+            });
+        }
+
+        window.renderMessages = () => {
+            const list = document.getElementById('messagesList');
+            if (!window.userMessages || window.userMessages.length === 0) {
+                list.innerHTML = '<div style="color:#888; font-size: 0.95rem;">У вас пока нет сообщений</div>';
+                return;
+            }
+            list.innerHTML = window.userMessages.map(m => `
+                <div class="message-card ${m.read ? '' : 'unread'}" onclick="markAsRead('${m.id}')">
+                    <div class="msg-time">${new Date(m.timestamp).toLocaleString()}</div>
+                    <div class="msg-text">${m.text}</div>
+                </div>
+            `).join('');
+        };
+
+        window.markAsRead = async (msgId) => {
+            const msg = window.userMessages.find(m => m.id === msgId);
+            if(msg && !msg.read) {
+                await updateDoc(doc(db, "users", auth.currentUser.uid, "messages", msgId), { read: true });
+            }
+        };
+
         function renderHeaderBlock(userData) {
             const block = document.getElementById('headerAuthBlock');
             if (userData) {
+                const isAdmin = auth.currentUser.uid === ADMIN_UID;
                 block.innerHTML = `
+                    ${isAdmin ? '<button class="btn btn-danger" style="padding: 6px 14px; font-size: 0.8rem;" onclick="openAdminModal()">Админ</button>' : ''}
+                    <button class="btn btn-outline" style="padding: 6px 16px; position: relative;" onclick="openMessagesModal()">
+                        Сообщения <span id="msgBadge" class="msg-badge" style="display:none;">0</span>
+                    </button>
                     <div class="profile-nav-btn" onclick="openProfileModal()">
                         <img class="profile-nav-avatar" src="${userData.avatarUrl}" onerror="this.src='${defaultAvatar}'">
                         <span class="profile-nav-name">${userData.username}</span>
@@ -962,11 +1110,73 @@
             if (user) {
                 const data = await syncUserData(user);
                 renderHeaderBlock(data);
+                listenToMessages(user.uid);
                 if(document.getElementById('profileModal').classList.contains('active')) renderProfileModalData(data);
             } else {
+                if (unsubMessages) unsubMessages();
                 renderHeaderBlock(null);
             }
         });
+
+        // --- ЛОГИКА АДМИН ПАНЕЛИ ---
+        window.openAdminModal = async () => {
+            if(!auth.currentUser || auth.currentUser.uid !== ADMIN_UID) return;
+            closeAllModals();
+            document.getElementById('adminModal').classList.add('active');
+            
+            showToast("Загрузка пользователей...", "success");
+            const usersSnap = await getDocs(collection(db, "users"));
+            const select = document.getElementById('adminUserSelect');
+            select.innerHTML = '<option value="">Выберите пользователя...</option>';
+            usersSnap.forEach(doc => {
+                const u = doc.data();
+                select.innerHTML += `<option value="${u.uid}">${u.username} (${u.uid})</option>`;
+            });
+        }
+        
+        window.closeAdminModal = () => { document.getElementById('adminModal').classList.remove('active'); }
+        
+        window.adminSendMessage = async () => {
+            const uid = document.getElementById('adminUserSelect').value;
+            const text = document.getElementById('adminMessageText').value;
+            if(!uid || !text.trim()) return showToast('Выберите юзера и введите текст', 'error');
+            
+            try {
+                await setDoc(doc(collection(db, "users", uid, "messages")), {
+                    text: text,
+                    timestamp: new Date().getTime(),
+                    read: false
+                });
+                showToast('Сообщение успешно отправлено!', 'success');
+                document.getElementById('adminMessageText').value = '';
+            } catch(e) { showToast('Ошибка отправки', 'error'); }
+        }
+
+        // --- ЛОГИКА ПОПОЛНЕНИЯ БАЛАНСА ---
+        window.processTopup = async () => {
+            const amountInput = document.getElementById('topupAmount').value;
+            const amount = parseInt(amountInput);
+            if (isNaN(amount) || amount < 100 || amount > 10000) {
+                return showToast('Сумма должна быть от 100 до 10000 ₽', 'error');
+            }
+            
+            try {
+                // Имитация успешной оплаты: сразу начисляем на баланс
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                const snap = await getDoc(userRef);
+                const currentBalance = snap.data().balance || 0;
+                
+                await updateDoc(userRef, { balance: currentBalance + amount });
+                showToast(`Баланс успешно пополнен на ${amount} ₽!`, 'success');
+                window.closeTopupModal();
+                
+                // Обновляем данные в модалке профиля
+                const updatedSnap = await getDoc(userRef);
+                renderProfileModalData(updatedSnap.data());
+            } catch(e) {
+                showToast('Ошибка при пополнении баланса', 'error');
+            }
+        }
 
         window.updateProfileName = async function() {
             const newName = document.getElementById('profileNameInput').value.trim();
@@ -1034,7 +1244,6 @@
                     
                     showToast("Связываемся с базой Firebase, резервируем ключ...", "success");
                     
-                    // Запуск процесса безопасного извлечения ключа из Firestore
                     const dbKey = await fetchAndAssignKey(auth.currentUser.uid);
                     if (dbKey) {
                         showToast("Успешная покупка тарифа ILLUSION PRO!", "success");
@@ -1084,6 +1293,9 @@
             if(e.target === document.getElementById('authModal')) window.closeAuthModal();
             if(e.target === document.getElementById('regModal')) window.closeRegModal();
             if(e.target === document.getElementById('profileModal')) window.closeProfileModal();
+            if(e.target === document.getElementById('messagesModal')) window.closeMessagesModal();
+            if(e.target === document.getElementById('topupModal')) window.closeTopupModal();
+            if(e.target === document.getElementById('adminModal')) window.closeAdminModal();
         });
     </script>
 </body>
