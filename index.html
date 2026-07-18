@@ -766,7 +766,7 @@
 
     <div id="toastContainer"></div>
 
-    <footer>
+        <footer>
         <div class="footer-content">
             <div>
                 <p style="color: #fff; font-weight: 800; letter-spacing: 2px; margin-bottom: 12px;">© ILLUSION STACKS, 2026</p>
@@ -774,10 +774,12 @@
             </div>
             <div class="footer-links">
                 <a href="#">Политика конфиденциальности</a>
-                <a href="https://t.me/Lacven">Поддержка</a>
+                <a href="mailto:illusionstacks@mail.ru">illusionstacks@mail.ru</a>
+                <a href="https://t.me/Lacven" target="_blank">Поддержка Telegram</a>
             </div>
         </div>
     </footer>
+
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -841,24 +843,32 @@
         // --- НОВЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С MYSQL (ЧЕРЕЗ API.PHP) ---
 
         // Запрос к api.php для получения ключа без HWID
+        // Запрос к api.php для получения ключа без HWID
         async function fetchFreeKey() {
             try {
-                // Путь к твоему php файлу. Если он лежит рядом с index.html, оставляем так:
                 const response = await fetch('api.php?action=get_free_key');
+                
+                if (!response.ok) {
+                    showToast(`Ошибка сервера хостинга: статус ${response.status}`, "error");
+                    return null;
+                }
+                
                 const data = await response.json();
                 
                 if (data.success) {
                     return data.key; 
                 } else {
-                    showToast(data.message || "В базе кончились ключи!", "error");
+                    // Если api.php прислал ошибку базы данных, выводим её текст
+                    showToast(data.message || "Неизвестная ошибка сервера", "error");
                     return null;
                 }
             } catch (error) {
                 console.error("Ошибка запроса:", error);
-                showToast("Ошибка подключения к серверу выдачи ключей.", "error");
+                showToast("Сайт не видит api.php. Убедись, что файлы залиты на хостинг с поддержкой PHP, а не открыты прямо с ПК!", "error");
                 return null;
             }
         }
+
 
         // Запрос к api.php для проверки, есть ли такой HWID в базе (опционально для использования в лоудере)
         async function checkHwid(hwidString) {
