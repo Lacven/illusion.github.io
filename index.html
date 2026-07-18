@@ -833,34 +833,32 @@
             }, 3500);
         }
 
-        // --- БЕЗОПАСНАЯ ВЫДАЧА КЛЮЧА НАПРЯМУЮ ИЗ FIREBASE ---
+                // БЕЗОПАСНАЯ ВЫДАЧА КЛЮЧА НАПРЯМУЮ ИЗ FIREBASE
         async function fetchAndAssignKey(userUid) {
             try {
-                // Ищем один свободный ключ в Firebase
                 const keysRef = collection(db, "hwid_keys");
+                // Ищем свободный ключ
                 const q = query(keysRef, where("used", "==", false), limit(1));
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    showToast("В Firebase закончились свободные ключи! Добавьте новые ключи в панель.", "error");
+                    showToast("В базе нет ключей со статусом used = false!", "error");
                     return null;
                 }
 
                 const keyDoc = querySnapshot.docs[0];
-                const keyData = keyDoc.data();
-                const keyString = keyData.key;
+                const keyString = keyDoc.data().key;
                 
                 const keyDocRef = doc(db, "hwid_keys", keyDoc.id);
                 const userRef = doc(db, "users", userUid);
 
-                // Запускаем транзакции: атомарно списываем баланс и забираем ключ
+                // Запускаем транзакцию
                 await runTransaction(db, async (transaction) => {
-                    const freshKeySnap = await transaction.get(keyDocRef);
-                    if (freshKeySnap.data().used === true) {
-                        throw "Ключ был перехвачен другим покупателем. Попробуйте снова.";
+                    const userSnap = await transaction.get(userRef);
+                    if (!userSnap.exists()) {
+                        throw "Ошибка профиля: документ юзера не найден в базе. Выйди из аккаунта и зайди снова!";
                     }
 
-                    const userSnap = await transaction.get(userRef);
                     const userData = userSnap.data();
                     let currentItems = userData.items || [];
                     
@@ -868,10 +866,10 @@
                         throw "У вас уже приобретен этот тариф!";
                     }
 
-                    // 1. Помечаем ключ в Firebase как использованный
+                    // 1. Помечаем ключ
                     transaction.update(keyDocRef, { used: true, assignedTo: userUid });
                     
-                    // 2. Списываем 500 рублей с баланса в Firebase и добавляем товар
+                    // 2. Списываем баланс и выдаем товар
                     currentItems.push({ name: "ILLUSION PRO", status: "Активна" });
                     transaction.update(userRef, {
                         balance: userData.balance - 500,
@@ -882,11 +880,13 @@
 
                 return keyString;
             } catch (error) {
-                console.error("Ошибка при покупке:", error);
-                showToast(typeof error === 'string' ? error : "Не удалось завершить транзакцию покупки.", "error");
+                // ВЫВОДИМ ТОЧНУЮ ОШИБКУ ПРЯМО НА ЭКРАН ТЕЛЕФОНА
+                let errorText = typeof error === 'string' ? error : (error.message || "Неизвестный сбой");
+                showToast("Сбой: " + errorText, "error");
                 return null;
             }
         }
+
 
         async function syncUserData(user) {
             const userRef = doc(db, "users", user.uid);
