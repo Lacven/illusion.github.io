@@ -71,8 +71,6 @@
             cursor: pointer;
         }
 
-        .logo-img { height: 35px; width: auto; object-fit: contain; }
-
         .logo-text {
             font-weight: 800;
             letter-spacing: 4px;
@@ -621,7 +619,6 @@
         </div>
     </section>
 
-    <!-- Подробное модальное окно (Карточка товара) -->
     <div class="modal" id="detailsModal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -660,7 +657,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно: Личный Кабинет -->
     <div class="modal" id="profileModal">
         <div class="modal-content" style="max-width: 750px; padding: 40px;">
             <span class="close-modal" onclick="closeProfileModal()">&times;</span>
@@ -714,7 +710,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно: Авторизация -->
     <div class="modal" id="authModal">
         <div class="modal-content modal-content-sm" style="text-align: center;">
             <span class="close-modal" onclick="closeAuthModal()">&times;</span>
@@ -741,7 +736,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно: Регистрация -->
     <div class="modal" id="regModal">
         <div class="modal-content modal-content-sm" style="text-align: center;">
             <span class="close-modal" onclick="closeRegModal()">&times;</span>
@@ -766,7 +760,7 @@
 
     <div id="toastContainer"></div>
 
-        <footer>
+    <footer>
         <div class="footer-content">
             <div>
                 <p style="color: #fff; font-weight: 800; letter-spacing: 2px; margin-bottom: 12px;">© ILLUSION STACKS, 2026</p>
@@ -774,17 +768,16 @@
             </div>
             <div class="footer-links">
                 <a href="#">Политика конфиденциальности</a>
-                <a href="mailto:illusionstacks@mail.ru">illusionstacks@mail.ru</a>
+                <a href="mailto:support@illusion-stacks.com">support@illusion-stacks.com</a>
                 <a href="https://t.me/Lacven" target="_blank">Поддержка Telegram</a>
             </div>
         </div>
     </footer>
 
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, limit, getDocs, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // ТВОЙ КОНФИГ FIREBASE
         const firebaseConfig = {
@@ -840,48 +833,60 @@
             }, 3500);
         }
 
-        // --- НОВЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С MYSQL (ЧЕРЕЗ API.PHP) ---
-
-        // Запрос к api.php для получения ключа без HWID
-        // Запрос к api.php для получения ключа без HWID
-        async function fetchFreeKey() {
+        // --- БЕЗОПАСНАЯ ВЫДАЧА КЛЮЧА НАПРЯМУЮ ИЗ FIREBASE ---
+        async function fetchAndAssignKey(userUid) {
             try {
-                const response = await fetch('api.php?action=get_free_key');
-                
-                if (!response.ok) {
-                    showToast(`Ошибка сервера хостинга: статус ${response.status}`, "error");
+                // Ищем один свободный ключ в Firebase
+                const keysRef = collection(db, "hwid_keys");
+                const q = query(keysRef, where("used", "==", false), limit(1));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    showToast("В Firebase закончились свободные ключи! Добавьте новые ключи в панель.", "error");
                     return null;
                 }
+
+                const keyDoc = querySnapshot.docs[0];
+                const keyData = keyDoc.data();
+                const keyString = keyData.key;
                 
-                const data = await response.json();
-                
-                if (data.success) {
-                    return data.key; 
-                } else {
-                    // Если api.php прислал ошибку базы данных, выводим её текст
-                    showToast(data.message || "Неизвестная ошибка сервера", "error");
-                    return null;
-                }
+                const keyDocRef = doc(db, "hwid_keys", keyDoc.id);
+                const userRef = doc(db, "users", userUid);
+
+                // Запускаем транзакции: атомарно списываем баланс и забираем ключ
+                await runTransaction(db, async (transaction) => {
+                    const freshKeySnap = await transaction.get(keyDocRef);
+                    if (freshKeySnap.data().used === true) {
+                        throw "Ключ был перехвачен другим покупателем. Попробуйте снова.";
+                    }
+
+                    const userSnap = await transaction.get(userRef);
+                    const userData = userSnap.data();
+                    let currentItems = userData.items || [];
+                    
+                    if (currentItems.some(i => i.name === "ILLUSION PRO")) {
+                        throw "У вас уже приобретен этот тариф!";
+                    }
+
+                    // 1. Помечаем ключ в Firebase как использованный
+                    transaction.update(keyDocRef, { used: true, assignedTo: userUid });
+                    
+                    // 2. Списываем 500 рублей с баланса в Firebase и добавляем товар
+                    currentItems.push({ name: "ILLUSION PRO", status: "Активна" });
+                    transaction.update(userRef, {
+                        balance: userData.balance - 500,
+                        items: currentItems,
+                        userKey: keyString
+                    });
+                });
+
+                return keyString;
             } catch (error) {
-                console.error("Ошибка запроса:", error);
-                showToast("Сайт не видит api.php. Убедись, что файлы залиты на хостинг с поддержкой PHP, а не открыты прямо с ПК!", "error");
+                console.error("Ошибка при покупке:", error);
+                showToast(typeof error === 'string' ? error : "Не удалось завершить транзакцию покупки.", "error");
                 return null;
             }
         }
-
-
-        // Запрос к api.php для проверки, есть ли такой HWID в базе (опционально для использования в лоудере)
-        async function checkHwid(hwidString) {
-            try {
-                const response = await fetch(`api.php?action=check_hwid&hwid=${hwidString}`);
-                const data = await response.json();
-                return data.status === 'linked';
-            } catch (error) {
-                console.error("Ошибка базы:", error);
-                return false;
-            }
-        }
-        // ---------------------------------------------------------
 
         async function syncUserData(user) {
             const userRef = doc(db, "users", user.uid);
@@ -1027,23 +1032,15 @@
                     let currentItems = data.items || [];
                     if (currentItems.some(i => i.name === "ILLUSION PRO")) return showToast('У вас уже приобретен ILLUSION PRO!', 'error');
                     
-                    showToast("Связываемся с базой данных, получаем ключ...", "success");
+                    showToast("Связываемся с базой Firebase, резервируем ключ...", "success");
                     
-                    // 1. ЗАПРАШИВАЕМ КЛЮЧ ИЗ БД (API.PHP)
-                    const dbKey = await fetchFreeKey();
-                    if (!dbKey) return; // Если ключей нет, прерываем покупку
-
-                    // 2. ВЫДАЕМ ПОЛЬЗОВАТЕЛЮ ТОВАР И СОХРАНЯЕМ КЛЮЧ
-                    currentItems.push({ name: "ILLUSION PRO", status: "Активна" });
-                    await updateDoc(ref, {
-                        balance: data.balance - 500,
-                        items: currentItems,
-                        userKey: dbKey // Сохраняем реальный ключ из БД
-                    });
-
-                    showToast("Успешная покупка тарифа ILLUSION PRO!", "success");
-                    const updatedSnap = await getDoc(ref);
-                    renderProfileModalData(updatedSnap.data());
+                    // Запуск процесса безопасного извлечения ключа из Firestore
+                    const dbKey = await fetchAndAssignKey(auth.currentUser.uid);
+                    if (dbKey) {
+                        showToast("Успешная покупка тарифа ILLUSION PRO!", "success");
+                        const updatedSnap = await getDoc(ref);
+                        renderProfileModalData(updatedSnap.data());
+                    }
                 } else {
                     showToast('Недостаточно средств. Пополните баланс.', 'error');
                 }
