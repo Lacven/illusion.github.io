@@ -641,6 +641,7 @@
             #toastContainer { right: 20px; bottom: 20px; left: 20px; max-width: calc(100% - 40px); }
         }
     </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -832,17 +833,17 @@
 
             <div style="text-align: center; margin-top: 30px; font-weight: 800; color: #666; text-transform: uppercase; letter-spacing: 2px;">Привязать аккаунты</div>
             <div class="social-container">
-                <button class="social-btn btn-tiktok" onclick="showToast('В разработке: привязка TikTok', 'error')">
+                <button class="social-btn btn-tiktok" id="connect-tiktok-btn" onclick="startTiktokAuth()">
                     <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg> 
-                    TikTok
+                    <span id="tiktok-status-text">TikTok</span>
                 </button>
-                <button class="social-btn btn-youtube" onclick="showToast('В разработке: привязка YouTube', 'error')">
+                <button class="social-btn btn-youtube" id="connect-youtube-btn" onclick="startYoutubeAuth()">
                     <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg> 
-                    YouTube
+                    <span id="youtube-status-text">YouTube</span>
                 </button>
-                <button class="social-btn btn-twitch" onclick="showToast('В разработке: привязка Twitch', 'error')">
+                <button class="social-btn btn-twitch" id="connect-twitch-btn" onclick="startTwitchAuth()">
                     <svg viewBox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg> 
-                    Twitch
+                    <span id="twitch-status-text">Twitch</span>
                 </button>
             </div>
         </div>
@@ -897,6 +898,13 @@
             </div>
             
             <button class="btn btn-danger" style="width: 100%; margin-top: 10px;" onclick="adminSendMessage()">Отправить сообщение</button>
+
+            <div style="margin-top: 35px; padding-top: 25px; border-top: 1px solid var(--card-border);">
+                <h4 style="margin-bottom: 15px; color: #a78bfa;">🎬 Заявки криэйторов</h4>
+                <div id="creatorAppsList" style="display: flex; flex-direction: column; gap: 12px; max-height: 350px; overflow-y: auto;">
+                    <!-- Заявки рендерятся сюда -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1061,6 +1069,153 @@
         window.closeMessagesModal = () => { document.getElementById('messagesModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
         window.openCreatorModal = () => { closeAllModals(); document.getElementById('creatorModal').classList.add('active'); document.body.style.overflow = 'hidden'; }
         window.closeCreatorModal = () => { document.getElementById('creatorModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
+
+        // --- ПРИВЯЗКА СОЦСЕТЕЙ (Creator Program) ---
+        // Публичные Client ID — их можно смело хранить в коде сайта, это не секреты
+        const TWITCH_CLIENT_ID = "sgkhqoxvepnyb5dxu5ffyjvbpkp03a";
+        const GOOGLE_CLIENT_ID = "983178508419-it9534v1qrsmtsjh01t7ajfndp7udab6.apps.googleusercontent.com";
+
+        function requireLogin() {
+            if (auth.currentUser) return true;
+            showToast('Авторизуйтесь на сайте, прежде чем привязывать соцсеть', 'error');
+            window.closeCreatorModal();
+            window.openAuthModal();
+            return false;
+        }
+
+        // ===== TWITCH: браузерный OAuth (Implicit Grant), секрет не требуется =====
+        window.startTwitchAuth = function() {
+            if (!requireLogin()) return;
+            const redirectUri = window.location.origin + window.location.pathname;
+            const authUrl = new URL("https://id.twitch.tv/oauth2/authorize");
+            authUrl.searchParams.set("client_id", TWITCH_CLIENT_ID);
+            authUrl.searchParams.set("redirect_uri", redirectUri);
+            authUrl.searchParams.set("response_type", "token");
+            authUrl.searchParams.set("scope", "user:read:email moderator:read:followers");
+            window.location.href = authUrl.toString();
+        }
+
+        window.processTwitchToken = async function(user, token) {
+            try {
+                const res = await fetch("https://api.twitch.tv/helix/users", {
+                    headers: { "Authorization": `Bearer ${token}`, "Client-Id": TWITCH_CLIENT_ID }
+                });
+                const data = await res.json();
+                const tUser = data.data && data.data[0];
+                if (!tUser) throw new Error("Не удалось получить профиль Twitch");
+
+                let followers = "неизвестно";
+                try {
+                    const fRes = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${tUser.id}`, {
+                        headers: { "Authorization": `Bearer ${token}`, "Client-Id": TWITCH_CLIENT_ID }
+                    });
+                    const fData = await fRes.json();
+                    followers = fData.total ?? "неизвестно";
+                } catch (_) {}
+
+                await window.saveCreatorApplication(user, {
+                    platform: "twitch",
+                    nick: tUser.display_name,
+                    link: `https://twitch.tv/${tUser.login}`,
+                    email: tUser.email || "не предоставлена",
+                    followers
+                });
+            } catch (e) {
+                showToast("Ошибка получения данных Twitch: " + e.message, "error");
+            }
+        }
+
+        // ===== YOUTUBE: Google Identity Services, секрет не требуется =====
+        let googleTokenClient = null;
+        function initGoogleClient() {
+            if (window.google && window.google.accounts) {
+                googleTokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: GOOGLE_CLIENT_ID,
+                    scope: "openid email profile https://www.googleapis.com/auth/youtube.readonly",
+                    callback: async (resp) => {
+                        if (resp.error) { showToast("Ошибка авторизации Google", "error"); return; }
+                        await window.processGoogleToken(auth.currentUser, resp.access_token);
+                    }
+                });
+            }
+        }
+        window.addEventListener("load", () => setTimeout(initGoogleClient, 300));
+
+        window.startYoutubeAuth = function() {
+            if (!requireLogin()) return;
+            if (!googleTokenClient) { showToast("Google SDK ещё загружается, попробуй ещё раз через секунду", "error"); return; }
+            googleTokenClient.requestAccessToken();
+        }
+
+        window.processGoogleToken = async function(user, token) {
+            try {
+                const profRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", { headers: { Authorization: `Bearer ${token}` } });
+                const profile = await profRes.json();
+                const chRes = await fetch("https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true", { headers: { Authorization: `Bearer ${token}` } });
+                const chData = await chRes.json();
+                const channel = chData.items && chData.items[0];
+
+                await window.saveCreatorApplication(user, {
+                    platform: "youtube",
+                    nick: (channel && channel.snippet.title) || profile.name || "неизвестно",
+                    link: channel ? `https://youtube.com/channel/${channel.id}` : "не найдена",
+                    email: profile.email || "не предоставлена",
+                    followers: (channel && channel.statistics.subscriberCount) ?? "неизвестно"
+                });
+            } catch (e) {
+                showToast("Ошибка получения данных YouTube: " + e.message, "error");
+            }
+        }
+
+        // ===== TIKTOK: у TikTok нет браузерного режима без секрета — ручная заявка на время беты =====
+        window.startTiktokAuth = function() {
+            if (!requireLogin()) return;
+            const link = prompt("Вставь ссылку на свой TikTok-профиль (например https://tiktok.com/@username):");
+            if (!link || !link.trim()) return;
+            const followers = prompt("Укажи примерное количество подписчиков:") || "не указано";
+            const nickMatch = link.match(/@([\w.]+)/);
+            window.saveCreatorApplication(auth.currentUser, {
+                platform: "tiktok",
+                nick: nickMatch ? nickMatch[1] : "неизвестно",
+                link: link.trim(),
+                email: "не запрашивается (ручная заявка)",
+                followers
+            });
+        }
+
+        // ===== Обработка возврата с Twitch (токен приходит в hash-фрагменте URL) =====
+        window.pendingTwitchToken = (function() {
+            if (window.location.hash.includes("access_token")) {
+                const params = new URLSearchParams(window.location.hash.substring(1));
+                const token = params.get("access_token");
+                window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+                return token;
+            }
+            return null;
+        })();
+
+        window.saveCreatorApplication = async function(user, data) {
+            try {
+                await setDoc(doc(collection(db, "creatorApplications")), {
+                    uid: user.uid,
+                    username: user.displayName || 'без ника',
+                    platform: data.platform,
+                    nick: data.nick,
+                    link: data.link,
+                    email: data.email,
+                    followers: data.followers,
+                    timestamp: new Date().getTime(),
+                    status: 'new'
+                });
+                const labels = { twitch: 'Twitch', youtube: 'YouTube', tiktok: 'TikTok' };
+                showToast(`${labels[data.platform] || 'Аккаунт'} привязан! Заявка отправлена администрации.`, 'success');
+                const statusEl = document.getElementById(`${data.platform}-status-text`);
+                if (statusEl) statusEl.textContent = `${statusEl.textContent} ✓`;
+                setTimeout(() => window.openCreatorModal && window.openCreatorModal(), 300);
+            } catch (e) {
+                showToast('Не удалось сохранить заявку. Проверь Firestore правила.', 'error');
+            }
+        }
         
         window.closeAllModals = () => {
             window.closeModal(); window.closeAuthModal(); window.closeRegModal(); 
@@ -1270,6 +1425,11 @@
                 renderHeaderBlock(data);
                 listenToMessages(user.uid);
                 if(document.getElementById('profileModal').classList.contains('active')) renderProfileModalData(data);
+                if (window.pendingTwitchToken) {
+                    const t = window.pendingTwitchToken;
+                    window.pendingTwitchToken = null;
+                    window.processTwitchToken(user, t);
+                }
             } else {
                 if (unsubMessages) unsubMessages();
                 renderHeaderBlock(null);
@@ -1290,6 +1450,45 @@
                 const u = doc.data();
                 select.innerHTML += `<option value="${u.uid}">${u.username} (${u.uid})</option>`;
             });
+
+            renderCreatorApplications();
+        }
+
+        window.renderCreatorApplications = async function() {
+            const listEl = document.getElementById('creatorAppsList');
+            listEl.innerHTML = '<div style="color:#666; font-size:0.85rem;">Загрузка заявок...</div>';
+            try {
+                const q = query(collection(db, "creatorApplications"), orderBy("timestamp", "desc"), limit(30));
+                const snap = await getDocs(q);
+                if (snap.empty) {
+                    listEl.innerHTML = '<div style="color:#666; font-size:0.85rem;">Заявок пока нет.</div>';
+                    return;
+                }
+                const platformLabels = { twitch: 'Twitch', youtube: 'YouTube', tiktok: 'TikTok' };
+                listEl.innerHTML = '';
+                snap.forEach(docSnap => {
+                    const a = docSnap.data();
+                    const card = document.createElement('div');
+                    card.style.cssText = 'background: rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:10px; padding:14px 16px; font-size:0.85rem; line-height:1.6;';
+                    card.innerHTML = `
+                        <div style="font-weight:800; color:#a78bfa; margin-bottom:4px;">${platformLabels[a.platform] || a.platform}</div>
+                        <div>Ник соцсети: <b>${escapeHtml(a.nick || '—')}</b></div>
+                        <div>Ссылка: <a href="${escapeHtml(a.link || '#')}" target="_blank" class="link-accent">${escapeHtml(a.link || '—')}</a></div>
+                        <div>Почта: ${escapeHtml(a.email || '—')}</div>
+                        <div>Подписчиков: ${escapeHtml(String(a.followers ?? '—'))}</div>
+                        <div style="margin-top:6px; color:#888;">Пользователь сайта: ${escapeHtml(a.username || '—')} (uid: ${escapeHtml(a.uid || '—')})</div>
+                    `;
+                    listEl.appendChild(card);
+                });
+            } catch (e) {
+                listEl.innerHTML = '<div style="color:#ff4a4a; font-size:0.85rem;">Ошибка загрузки заявок. Проверь Firestore-правила для коллекции creatorApplications.</div>';
+            }
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
         
         window.closeAdminModal = () => { document.getElementById('adminModal').classList.remove('active'); }
