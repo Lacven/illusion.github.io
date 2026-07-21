@@ -1037,8 +1037,7 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, limit, getDocs, runTransaction, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
-        const TIKTOK_CLIENT_ID = "aw8r1a947z66pskj"; // Ваш Client Key[span_2](start_span)[span_2](end_span)
-
+        const TIKTOK_CLIENT_ID = "aw8r1a947z66pskj"; 
 
         const firebaseConfig = {
             apiKey: "AIzaSyDCLPh1Gcxe97UUxiLZFB-CrSnZd24y0Bs",
@@ -1074,7 +1073,6 @@
         window.closeCreatorModal = () => { document.getElementById('creatorModal').classList.remove('active'); document.body.style.overflow = 'auto'; }
 
         // --- ПРИВЯЗКА СОЦСЕТЕЙ (Creator Program) ---
-        // Публичные Client ID — их можно смело хранить в коде сайта, это не секреты
         const TWITCH_CLIENT_ID = "sgkhqoxvepnyb5dxu5ffyjvbpkp03a";
         const GOOGLE_CLIENT_ID = "983178508419-it9534v1qrsmtsjh01t7ajfndp7udab6.apps.googleusercontent.com";
 
@@ -1086,7 +1084,7 @@
             return false;
         }
 
-        // ===== TWITCH: браузерный OAuth (Implicit Grant), секрет не требуется =====
+        // ===== TWITCH =====
         window.startTwitchAuth = function() {
             if (!requireLogin()) return;
             const redirectUri = window.location.origin + window.location.pathname;
@@ -1128,7 +1126,7 @@
             }
         }
 
-        // ===== YOUTUBE: Google Identity Services, секрет не требуется =====
+        // ===== YOUTUBE =====
         let googleTokenClient = null;
         function initGoogleClient() {
             if (window.google && window.google.accounts) {
@@ -1170,24 +1168,22 @@
             }
         }
 
-        // ===== TIKTOK: у TikTok нет браузерного режима без секрета — ручная заявка на время беты =====
-window.startTiktokAuth = function() {
-    if (!requireLogin()) return; // Проверка авторизации на сайте
-    
-    const redirectUri = window.location.origin + window.location.pathname;
-    const authUrl = new URL("https://www.tiktok.com/v2/auth/authorize/");
-    
-    authUrl.searchParams.set("client_id", TIKTOK_CLIENT_ID);
-    authUrl.searchParams.set("scope", "user.info.basic"); // Базовые права
-    authUrl.searchParams.set("response_type", "token");
-    authUrl.searchParams.set("redirect_uri", redirectUri);
-    authUrl.searchParams.set("state", auth.currentUser.uid); // Передаем UID пользователя
-    
-    window.location.href = authUrl.toString();
-};
+        // ===== TIKTOK =====
+        window.startTiktokAuth = function() {
+            if (!requireLogin()) return;
+            
+            const redirectUri = window.location.origin + window.location.pathname;
+            const authUrl = new URL("https://www.tiktok.com/v2/auth/authorize/");
+            
+            authUrl.searchParams.set("client_id", TIKTOK_CLIENT_ID);
+            authUrl.searchParams.set("scope", "user.info.basic");
+            authUrl.searchParams.set("response_type", "token");
+            authUrl.searchParams.set("redirect_uri", redirectUri);
+            authUrl.searchParams.set("state", auth.currentUser.uid);
+            
+            window.location.href = authUrl.toString();
+        };
 
-
-        // ===== Обработка возврата с Twitch (токен приходит в hash-фрагменте URL) =====
         window.pendingTwitchToken = (function() {
             if (window.location.hash.includes("access_token")) {
                 const params = new URLSearchParams(window.location.hash.substring(1));
@@ -1429,31 +1425,28 @@ window.startTiktokAuth = function() {
                 renderHeaderBlock(data);
                 listenToMessages(user.uid);
                 
-// Обработка возврата TikTok
-if (window.location.hash.includes("access_token")) {
-    const params = new URLSearchParams(window.location.hash.substring(1));
-    const token = params.get("access_token");
-    
-    // Очищаем URL
-    window.history.replaceState({}, document.title, window.location.pathname);
-    
-    // Получаем данные профиля TikTok
-    fetch(`https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url`, {
-        headers: { "Authorization": `Bearer ${token}` }
-    })
-    .then(res => res.json())
-    .then(data => {
-        // Сохраняем заявку в Firestore
-        window.saveCreatorApplication(user, {
-            platform: "tiktok",
-            nick: data.data.user.display_name,
-            link: "https://tiktok.com/@" + data.data.user.display_name,
-            email: "получено через TikTok",
-            followers: "требуется проверка"
-        });
-    })
-    .catch(err => showToast("Ошибка авторизации TikTok", "error"));
-}
+                // Обработка возврата TikTok
+                if (window.location.hash.includes("access_token")) {
+                    const params = new URLSearchParams(window.location.hash.substring(1));
+                    const token = params.get("access_token");
+                    
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    
+                    fetch(`https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url`, {
+                        headers: { "Authorization": `Bearer ${token}` }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        window.saveCreatorApplication(user, {
+                            platform: "tiktok",
+                            nick: data.data.user.display_name,
+                            link: "https://tiktok.com/@" + data.data.user.display_name,
+                            email: "получено через TikTok",
+                            followers: "требуется проверка"
+                        });
+                    })
+                    .catch(err => showToast("Ошибка авторизации TikTok", "error"));
+                }
 
                 if(document.getElementById('profileModal').classList.contains('active')) renderProfileModalData(data);
                 if (window.pendingTwitchToken) {
@@ -1540,8 +1533,14 @@ if (window.location.hash.includes("access_token")) {
             } catch(e) { showToast('Ошибка отправки', 'error'); }
         }
 
-        // --- ЛОГИКА ПОПОЛНЕНИЯ БАЛАНСА ---
+        // --- ЛОГИКА ПОПОЛНЕНИЯ БАЛАНСА (Интеграция с Vercel) ---
         window.processTopup = async () => {
+            if (!auth.currentUser) {
+                showToast('Сначала авторизуйтесь на сайте!', 'error');
+                window.openAuthModal();
+                return;
+            }
+
             const amountInput = document.getElementById('topupAmount').value;
             let amount = parseInt(amountInput);
             if (isNaN(amount) || amount < 100 || amount > 10000) {
@@ -1560,37 +1559,32 @@ if (window.location.hash.includes("access_token")) {
             }
             
             try {
-    showToast(`Создаем счет на ${finalAmount} ₽...`, 'success');
+                showToast('Переходим к оплате...', 'success');
+                const response = await fetch('https://illusion-payments.vercel.app/api/createPayment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: finalAmount,
+                        userId: auth.currentUser.uid
+                    })
+                });
 
-    // Отправляем запрос на СВОЙ сервер (например, Firebase Function).
-    // Передаем сумму и UID пользователя.
-    // Сервер сам свяжется с RuKassa, используя секретный API TOKEN,
-    // создаст платеж и вернет ссылку на оплату.
-    
-    / РАСКОММЕНТИРУЙ, КОГДА НАСТРОИШЬ СЕРВЕР:
-    const response = await fetch('https://illusion-payments.vercel.app/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            amount: finalAmount,
-            userId: auth.currentUser.uid
-        })
-    });
-    const data = await response.json();
+                const data = await response.json();
 
-    if (data.paymentUrl) {
-        // Перенаправляем пользователя на реальную страницу оплаты RuKassa
-        window.location.href = data.paymentUrl; 
-    } else {
-        showToast('Ошибка при создании платежа', 'error');
-    }
-    */
-
-    window.closeTopupModal();
-} catch(e) {
-    showToast('Ошибка при обработке запроса', 'error');
-}
-
+                if (data.paymentUrl) {
+                    document.getElementById('topupAmount').value = '';
+                    document.getElementById('topupPromo').value = '';
+                    window.closeTopupModal();
+                    // Перенаправление пользователя на кассу RuKassa
+                    window.location.href = data.paymentUrl;
+                } else {
+                    showToast(data.error || 'Ошибка при создании счета', 'error');
+                }
+            } catch(e) {
+                console.error(e);
+                showToast('Ошибка соединения с сервером платежей', 'error');
+            }
+        }
 
         window.updateProfileName = async function() {
             const newName = document.getElementById('profileNameInput').value.trim();
@@ -1715,4 +1709,3 @@ if (window.location.hash.includes("access_token")) {
     </script>
 </body>
 </html>
-
