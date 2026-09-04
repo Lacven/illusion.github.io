@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Illusion — Android у тебя на компьютере</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0c;
+    --bg-soft:#111114;
+    --ink:#f4efe9;
+    --ink-dim:#9a938d;
+    --ink-faint:#5c5652;
+    --red-bright:#ff1a1a;
+    --red-mid:#b30d0d;
+    --red-dark:#4a0000;
+    --red-deepest:#1a0303;
+    --ember:#ff5a2b;
+    --hairline: rgba(255,60,40,0.18);
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3, .display{
+    font-family:'Oswald', sans-serif;
+    font-weight:700;
+    letter-spacing:0.01em;
+    line-height:1.02;
+  }
+
+  a{color:inherit; text-decoration:none;}
+  ::selection{background:var(--red-mid); color:#fff;}
+
+  .wrap{max-width:1280px; margin:0 auto; padding:0 6vw;}
+
+  /* ---------- nav ---------- */
+  header.nav{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 6vw;
+  }
+  header.nav .word{
+    font-family:'Oswald', sans-serif; font-weight:700; font-size:20px;
+    letter-spacing:0.03em; color:var(--ink);
+  }
+  header.nav .word span{color:var(--red-bright);}
+  header.nav .cta-mini{
+    border:1px solid var(--hairline); padding:9px 18px; font-size:13px;
+    font-weight:500; border-radius:999px;
+    transition:border-color .25s ease, background .25s ease;
+  }
+  header.nav .cta-mini:hover{border-color:var(--red-bright); background:rgba(255,26,26,0.08);}
+
+  /* ---------- hero ---------- */
+  section.hero{
+    position:relative; min-height:100svh; display:flex; flex-direction:column;
+    justify-content:center; padding-top:110px; overflow:hidden;
+  }
+  .hero-bg{
+    position:absolute; inset:0; z-index:0;
+    background:
+      radial-gradient(ellipse 60% 50% at 72% 40%, rgba(120,10,10,0.35), transparent 60%),
+      radial-gradient(ellipse 80% 60% at 20% 85%, rgba(40,0,0,0.5), transparent 65%),
+      var(--bg);
+  }
+  #hero-canvas-wrap{position:absolute; inset:0; z-index:1;}
+  #hero-canvas-wrap canvas{display:block; width:100% !important; height:100% !important; touch-action:pan-y;}
+
+  .hero-grid{
+    position:relative; z-index:2; display:grid; grid-template-columns:1fr;
+    padding:0 6vw; pointer-events:none;
+  }
+  .hero-grid > *{pointer-events:auto;}
+  .eyebrow-note{font-size:14px; color:var(--ink-dim); max-width:360px; margin-bottom:18px; line-height:1.5;}
+  h1.hero-title{font-size:clamp(42px, 8vw, 96px); max-width:11.5ch; color:var(--ink);}
+  h1.hero-title em{font-style:normal; color:var(--red-bright);}
+  .hero-sub{margin-top:26px; font-size:18px; color:var(--ink-dim); max-width:44ch; line-height:1.6;}
+  .cta-row{margin-top:38px; display:flex; align-items:center; gap:22px; flex-wrap:wrap;}
+  .cta-primary{
+    background:var(--red-bright); color:#160000; font-weight:600; font-size:15px;
+    padding:15px 30px; border-radius:6px;
+    transition:transform .25s ease, box-shadow .25s ease, background .25s ease;
+    display:inline-block;
+  }
+  .cta-primary:hover{background:var(--ember); transform:translateY(-2px); box-shadow:0 12px 30px -8px rgba(255,90,43,0.55);}
+  .cta-secondary{font-size:14px; color:var(--ink-dim); border-bottom:1px solid var(--hairline); padding-bottom:2px; transition:color .2s ease, border-color .2s ease;}
+  .cta-secondary:hover{color:var(--ink); border-color:var(--ink-dim);}
+  .scroll-cue{
+    position:absolute; bottom:34px; left:6vw; z-index:2; font-size:12px; color:var(--ink-faint);
+    display:flex; align-items:center; gap:10px; letter-spacing:0.04em;
+  }
+  .scroll-cue .stem{width:1px; height:34px; background:linear-gradient(var(--red-mid), transparent);}
+
+  /* ---------- scroll-driven section ---------- */
+  section.pin-section{position:relative; background:var(--bg-soft); border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline);}
+  .pin-inner{display:grid; grid-template-columns:1fr 1fr; min-height:100svh;}
+  .pin-visual{position:relative; height:100svh; position:sticky; top:0;}
+  #scroll-canvas-wrap{position:absolute; inset:0;}
+  #scroll-canvas-wrap canvas{display:block; width:100% !important; height:100% !important;}
+  .pin-copy{display:flex; flex-direction:column; justify-content:center; padding:8vw 5vw 8vw 4vw;}
+  .feature-block{padding:8vh 0; max-width:38ch; opacity:0.25; transition:opacity .4s ease;}
+  .feature-block.is-active{opacity:1;}
+  .feature-block h3{font-size:clamp(22px,2.4vw,32px); margin-bottom:14px; color:var(--ink);}
+  .feature-block p{font-size:15px; line-height:1.7; color:var(--ink-dim);}
+  .feature-block .tag{
+    display:inline-block; font-size:12px; color:var(--red-bright); border:1px solid var(--red-dark);
+    background:rgba(179,13,13,0.08); padding:4px 10px; border-radius:999px; margin-bottom:16px;
+  }
+
+  /* ---------- details cards ---------- */
+  section.details{padding:14vh 0 10vh;}
+  .details-head{max-width:60ch; margin-bottom:8vh;}
+  .details-head h2{font-size:clamp(30px,4vw,46px); margin-bottom:16px;}
+  .details-head p{color:var(--ink-dim); font-size:16px; line-height:1.7; max-width:52ch;}
+  .card-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--hairline); border:1px solid var(--hairline);}
+  .card{background:var(--bg); padding:38px 32px; min-height:210px; display:flex; flex-direction:column; justify-content:space-between; transition:background .3s ease;}
+  .card:hover{background:var(--bg-soft);}
+  .card .num{font-family:'Oswald', sans-serif; font-size:13px; color:var(--red-mid); letter-spacing:0.08em;}
+  .card h3{font-size:20px; margin:16px 0 10px; color:var(--ink);}
+  .card p{font-size:14px; color:var(--ink-dim); line-height:1.6; max-width:32ch;}
+
+  /* ---------- genres / tags ---------- */
+  section.genres{padding:6vh 0 12vh; border-top:1px solid var(--hairline);}
+  .genres-head{max-width:60ch; margin-bottom:5vh;}
+  .genres-head h2{font-size:clamp(26px,3.4vw,38px); margin-bottom:14px;}
+  .genres-head p{color:var(--ink-dim); font-size:15.5px; line-height:1.7; max-width:52ch;}
+  .tag-row{display:flex; flex-wrap:wrap; gap:12px;}
+  .tag-pill{
+    font-size:14px; padding:11px 20px; border-radius:999px; border:1px solid var(--hairline);
+    color:var(--ink-dim); transition:border-color .2s ease, color .2s ease, background .2s ease;
+  }
+  .tag-pill:hover{border-color:var(--red-bright); color:var(--ink); background:rgba(255,26,26,0.06);}
+
+  /* ---------- specs ---------- */
+  section.specs{padding:12vh 0 12vh; border-top:1px solid var(--hairline);}
+  .specs-grid{display:grid; grid-template-columns:1fr 1.4fr; gap:6vw;}
+  .specs-head h2{font-size:clamp(28px,3.6vw,40px); max-width:9ch;}
+  .specs-head p{margin-top:18px; color:var(--ink-dim); font-size:15px; max-width:34ch; line-height:1.6;}
+  table.spec-table{width:100%; border-collapse:collapse;}
+  table.spec-table tr{border-bottom:1px solid var(--hairline);}
+  table.spec-table tr:first-child{border-top:1px solid var(--hairline);}
+  table.spec-table td{padding:15px 4px; font-size:14px; vertical-align:top;}
+  table.spec-table td:first-child{color:var(--ink-faint); width:42%; font-size:12.5px; letter-spacing:0.02em;}
+  table.spec-table td:last-child{color:var(--ink); font-family:'Inter', monospace;}
+  .placeholder{color:var(--ink-faint); font-style:italic;}
+
+  /* ---------- FAQ ---------- */
+  section.faq{padding:10vh 0 14vh; border-top:1px solid var(--hairline);}
+  .faq-head{max-width:60ch; margin-bottom:6vh;}
+  .faq-head h2{font-size:clamp(26px,3.4vw,38px);}
+  .faq-list{display:grid; gap:0;}
+  .faq-item{padding:26px 0; border-bottom:1px solid var(--hairline); display:grid; grid-template-columns:1fr 1.6fr; gap:6vw;}
+  .faq-item:first-child{border-top:1px solid var(--hairline);}
+  .faq-item h4{font-size:16.5px; font-weight:600; color:var(--ink); font-family:'Inter', sans-serif;}
+  .faq-item p{font-size:14.5px; color:var(--ink-dim); line-height:1.65;}
+
+  /* ---------- final cta ---------- */
+  section.final{position:relative; padding:16vh 0 12vh; text-align:center; overflow:hidden; border-top:1px solid var(--hairline);}
+  .final-bg{position:absolute; inset:0; background:radial-gradient(ellipse 60% 60% at 50% 30%, rgba(179,13,13,0.22), transparent 65%); z-index:0;}
+  .final-inner{position:relative; z-index:1;}
+  .final-glyph{width:130px; height:130px; margin:0 auto 34px;}
+  section.final h2{font-size:clamp(30px,5vw,56px); max-width:16ch; margin:0 auto 22px;}
+  section.final p{color:var(--ink-dim); font-size:16px; max-width:42ch; margin:0 auto 38px; line-height:1.6;}
+
+  footer{
+    padding:34px 6vw 44px; display:flex; justify-content:space-between; align-items:center;
+    font-size:12.5px; color:var(--ink-faint); border-top:1px solid var(--hairline); flex-wrap:wrap; gap:12px;
+  }
+
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+
+  @media (max-width: 880px){
+    .pin-inner{grid-template-columns:1fr;}
+    .pin-visual{height:52svh; position:relative; top:auto;}
+    .pin-copy{padding:6vh 6vw;}
+    .card-grid{grid-template-columns:1fr;}
+    .specs-grid{grid-template-columns:1fr; gap:6vh;}
+    .faq-item{grid-template-columns:1fr; gap:8px;}
+  }
+
+  .no-webgl #hero-canvas-wrap, .no-webgl #scroll-canvas-wrap{display:none;}
+  .static-fallback{position:absolute; inset:0; display:none; align-items:center; justify-content:center;}
+  .no-webgl .static-fallback{display:flex;}
+  .fallback-stack{width:46%; max-width:360px;}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="word">ILL<span>US</span>ION</div>
+  <a class="cta-mini" href="#download">Скачать</a>
+</header>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div id="hero-canvas-wrap">
+    <div class="static-fallback">
+      <svg class="fallback-stack" viewBox="0 0 460 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M230 20 L430 110 Q450 122 430 138 L246 224 Q230 232 214 224 L30 138 Q10 122 30 110 Z" fill="#f70909"/>
+        <text x="230" y="90" text-anchor="middle" font-family="Oswald, sans-serif" font-weight="700" font-size="40" fill="#ffffff">ILLUSION</text>
+        <path d="M20 172 L214 258 Q230 266 246 258 L440 172" stroke="#8a0000" stroke-width="22" stroke-linecap="round" fill="none"/>
+        <path d="M20 240 L214 326 Q230 334 246 326 L440 240" stroke="#5c0000" stroke-width="22" stroke-linecap="round" fill="none"/>
+        <path d="M20 308 L214 394 Q230 402 246 394 L440 308" stroke="#3a0400" stroke-width="22" stroke-linecap="round" fill="none"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="hero-grid">
+    <div class="eyebrow-note">Эмулятор Android для Windows</div>
+    <h1 class="hero-title">Мобильные игры, каким<br>они были <em>задуманы</em> —<br>на большом экране</h1>
+    <p class="hero-sub">Illusion разворачивает полноценный Android поверх Windows: клавиатура, мышь, мощь твоего процессора — и ни одной игры, урезанной под маленький экран телефона.</p>
+    <div class="cta-row">
+      <a class="cta-primary" href="#download">Скачать Illusion</a>
+      <a class="cta-secondary" href="#details">Как это работает</a>
+    </div>
+  </div>
+
+  <div class="scroll-cue"><div class="stem"></div>прокрути вниз</div>
+</section>
+
+<section class="pin-section" id="details">
+  <div class="pin-inner">
+    <div class="pin-visual"><div id="scroll-canvas-wrap"></div></div>
+    <div class="pin-copy">
+      <div class="feature-block" data-index="0">
+        <span class="tag">Внутри</span>
+        <h3>Настоящий Android, а не имитация</h3>
+        <p>Illusion поднимает изолированную Android-систему со своим доступом к GPU, накопителю и сети — игры видят её как обычный телефон, только очень быстрый.</p>
+      </div>
+      <div class="feature-block" data-index="1">
+        <span class="tag">Установка</span>
+        <h3>APK запускаются без переделок</h3>
+        <p>Ставишь игру из своего источника как есть — Illusion сам подбирает разрешение экрана и превращает клавиатуру с мышью в точное сенсорное управление.</p>
+      </div>
+      <div class="feature-block" data-index="2">
+        <span class="tag">Масштаб</span>
+        <h3>Столько окон, сколько нужно</h3>
+        <p>Открывай несколько копий Illusion параллельно — для второго аккаунта, гильдейских заданий или просто потому, что один экран телефона всегда был слишком тесным.</p>
+      </div>
+      <div class="feature-block" data-index="3">
+        <span class="tag">Прогресс</span>
+        <h3>Аккаунт остаётся твоим</h3>
+        <p>Заходишь через тот же игровой аккаунт, что и на телефоне — прогресс, покупки и рейтинг переносятся, а не начинаются с нуля.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="details">
+  <div class="wrap">
+    <div class="details-head">
+      <h2>Собран для тех, кто играет, а не ждёт загрузку</h2>
+      <p>Шесть вещей, которые Illusion делает иначе, чем телефон в кармане.</p>
+    </div>
+    <div class="card-grid">
+      <div class="card"><span class="num">01</span><div><h3>Нативная скорость</h3><p>Аппаратная виртуализация процессора вместо программной эмуляции — тяжёлые 3D-игры идут без просадок и перегрева в руке.</p></div></div>
+      <div class="card"><span class="num">02</span><div><h3>Клавиатура и мышь</h3><p>Своя раскладка клавиш под каждую игру — от прицеливания мышью в шутерах до горячих клавиш в стратегиях.</p></div></div>
+      <div class="card"><span class="num">03</span><div><h3>Экран без границ</h3><p>Игра растягивается на разрешение твоего монитора, а не сжимается в компактное окно на 6 дюймов.</p></div></div>
+      <div class="card"><span class="num">04</span><div><h3>Несколько копий сразу</h3><p>Запускай параллельные окна Illusion для разных аккаунтов — каждое со своим независимым Android внутри.</p></div></div>
+      <div class="card"><span class="num">05</span><div><h3>Запись игрового процесса</h3><p>Снимай ролики и стримы прямо из окна эмулятора — без сторонних программ захвата экрана.</p></div></div>
+      <div class="card"><span class="num">06</span><div><h3>Автоматизация рутины</h3><p>Записывай повторяющиеся действия — сбор ресурсов, ежедневные задания — и запускай их одним нажатием.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="genres">
+  <div class="wrap">
+    <div class="genres-head">
+      <h2>Для любых мобильных игр</h2>
+      <p>Illusion не заточен под один жанр — эмулятор одинаково хорошо ведёт себя и в неторопливых карточных играх, и в быстрых шутерах.</p>
+    </div>
+    <div class="tag-row">
+      <span class="tag-pill">MOBA</span>
+      <span class="tag-pill">Королевские битвы</span>
+      <span class="tag-pill">RPG и gacha</span>
+      <span class="tag-pill">Карточные и стратегии</span>
+      <span class="tag-pill">Кликеры и симуляторы</span>
+      <span class="tag-pill">Файтинги и аркады</span>
+      <span class="tag-pill">Визуальные новеллы</span>
+      <span class="tag-pill">Гонки</span>
+      <span class="tag-pill">Шутеры от первого лица</span>
+      <span class="tag-pill">Головоломки</span>
+    </div>
+  </div>
+</section>
+
+<section class="specs">
+  <div class="wrap specs-grid">
+    <div class="specs-head">
+      <h2>Технические характеристики</h2>
+      <p>Актуальные цифры уточняются перед релизом — здесь ориентир для планирования.</p>
+    </div>
+    <table class="spec-table">
+      <tr><td>Операционная система</td><td>Windows 10 / 11, 64-bit</td></tr>
+      <tr><td>Эмулируемая версия Android</td><td class="placeholder">[уточнить: версия Android]</td></tr>
+      <tr><td>Минимум ОЗУ</td><td class="placeholder">[уточнить: требования к ОЗУ]</td></tr>
+      <tr><td>Процессор</td><td class="placeholder">[уточнить: минимальный CPU]</td></tr>
+      <tr><td>Видеокарта</td><td class="placeholder">[уточнить: поддерживаемые GPU]</td></tr>
+      <tr><td>Место на диске</td><td class="placeholder">[уточнить: требуемое место]</td></tr>
+      <tr><td>Поддержка геймпада</td><td class="placeholder">[уточнить: список контроллеров]</td></tr>
+      <tr><td>Языки интерфейса</td><td class="placeholder">[уточнить: список языков]</td></tr>
+      <tr><td>Размер установщика</td><td class="placeholder">[уточнить: вес дистрибутива]</td></tr>
+      <tr><td>Стоимость</td><td class="placeholder">[уточнить: цена]</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="wrap">
+    <div class="faq-head"><h2>Частые вопросы</h2></div>
+    <div class="faq-list">
+      <div class="faq-item"><h4>Нужен ли root на телефоне?</h4><p>Нет. Illusion не трогает физический телефон — Android работает отдельно, внутри Windows.</p></div>
+      <div class="faq-item"><h4>Можно ли играть с геймпадом?</h4><p class="placeholder">[уточнить: поддержка геймпада на релизе]</p></div>
+      <div class="faq-item"><h4>Сохранится ли прогресс из мобильной версии?</h4><p>Если игра хранит сохранения в облачном аккаунте — да, прогресс подхватится автоматически при входе.</p></div>
+      <div class="faq-item"><h4>Не забанят ли аккаунт за эмулятор?</h4><p class="placeholder">[уточнить: политика конкретных игр в отношении эмуляторов]</p></div>
+      <div class="faq-item"><h4>Работает ли без интернета?</h4><p>Сам Illusion запускается локально, но конкретной игре может требоваться сеть — как и на телефоне.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="final" id="download">
+  <div class="final-bg"></div>
+  <div class="final-inner wrap">
+    <svg class="final-glyph" viewBox="0 0 460 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M230 20 L430 110 Q450 122 430 138 L246 224 Q230 232 214 224 L30 138 Q10 122 30 110 Z" fill="#f70909"/>
+      <path d="M20 172 L214 258 Q230 266 246 258 L440 172" stroke="#8a0000" stroke-width="22" stroke-linecap="round" fill="none"/>
+      <path d="M20 240 L214 326 Q230 334 246 326 L440 240" stroke="#5c0000" stroke-width="22" stroke-linecap="round" fill="none"/>
+      <path d="M20 308 L214 394 Q230 402 246 394 L440 308" stroke="#3a0400" stroke-width="22" stroke-linecap="round" fill="none"/>
+    </svg>
+    <h2>Твой телефон только что стал компьютером</h2>
+    <p>Один установщик — и вся библиотека мобильных игр открывается на экране, для которого они наконец подходят по размеру.</p>
+    <a class="cta-primary" href="#">Скачать Illusion</a>
+  </div>
+</section>
+
+<footer>
+  <span>Illusion — эмулятор Android для ПК</span>
+  <span>Демонстрационная страница</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasWebGL = (function(){
+    try{
+      var c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
+    }catch(e){ return false; }
+  })();
+
+  if(!hasWebGL || typeof THREE === 'undefined'){
+    document.documentElement.classList.add('no-webgl');
+    return;
+  }
+
+  if(window.gsap && window.ScrollTrigger){ gsap.registerPlugin(ScrollTrigger); }
+
+  // ---------- rounded-square plate geometry (matches the logo's diamond tiles) ----------
+  function roundedPlateGeometry(size, radius, depth){
+    var shape = new THREE.Shape();
+    var s = size/2, r = Math.min(radius, s*0.9);
+    shape.moveTo(-s + r, -s);
+    shape.lineTo(s - r, -s);
+    shape.quadraticCurveTo(s, -s, s, -s + r);
+    shape.lineTo(s, s - r);
+    shape.quadraticCurveTo(s, s, s - r, s);
+    shape.lineTo(-s + r, s);
+    shape.quadraticCurveTo(-s, s, -s, s - r);
+    shape.lineTo(-s, -s + r);
+    shape.quadraticCurveTo(-s, -s, -s + r, -s);
+    var geo = new THREE.ExtrudeGeometry(shape, {depth:depth, bevelEnabled:true, bevelThickness:depth*0.22, bevelSize:depth*0.16, bevelSegments:3, curveSegments:10});
+    geo.rotateX(Math.PI/2);
+    geo.translate(0, -depth/2, 0);
+    return geo;
+  }
+
+  // ---------- exact recreation of the Illusion logo: 4 stacked diamond tiles + white gaps + wordmark ----------
+  function buildLogoStack(){
+    var group = new THREE.Group();
+
+    var layers = [
+      {color:0xf70909, y:0.80, h:0.50, size:2.55},
+      {color:0x8a0000, y:0.32, h:0.24, size:2.68},
+      {color:0x5c0000, y:-0.08, h:0.24, size:2.80},
+      {color:0x3a0400, y:-0.48, h:0.24, size:2.92}
+    ];
+
+    var plates = [];
+    layers.forEach(function(L, i){
+      if(i > 0){
+        var spacerGeo = roundedPlateGeometry(L.size + 0.10, 0.5, 0.07);
+        var spacerMat = new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.55, metalness:0.02});
+        var spacer = new THREE.Mesh(spacerGeo, spacerMat);
+        spacer.rotation.y = Math.PI/4;
+        spacer.position.y = L.y + L.h/2 + 0.055;
+        group.add(spacer);
+      }
+      var geo = roundedPlateGeometry(L.size, 0.46, L.h);
+      var mat = new THREE.MeshPhysicalMaterial({
+        color:L.color, roughness:0.34, metalness:0.18,
+        clearcoat:0.55, clearcoatRoughness:0.3,
+        emissive:new THREE.Color(L.color), emissiveIntensity: i===0 ? 0.14 : 0.04
+      });
+      var plate = new THREE.Mesh(geo, mat);
+      plate.rotation.y = Math.PI/4;
+      plate.position.y = L.y;
+      group.add(plate);
+      plates.push(plate);
+    });
+
+    // wordmark on the top tile, kept upright (not rotated to the diamond)
+    var label = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.05, 0.5),
+      new THREE.MeshBasicMaterial({transparent:true, opacity:0})
+    );
+    label.rotation.x = -Math.PI/2;
+    label.position.y = layers[0].y + layers[0].h/2 + 0.02;
+    group.add(label);
+
+    function paintLabel(){
+      var canvas = document.createElement('canvas');
+      canvas.width = 1024; canvas.height = 256;
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = "700 128px Oswald, Arial, sans-serif";
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('ILLUSION', canvas.width/2, canvas.height/2 + 8);
+      var tex = new THREE.CanvasTexture(canvas);
+      tex.needsUpdate = true;
+      label.material.map = tex;
+      label.material.opacity = 1;
+      label.material.needsUpdate = true;
+    }
+    if(document.fonts && document.fonts.load){
+      document.fonts.load('700 128px Oswald').then(paintLabel).catch(paintLabel);
+    } else {
+      paintLabel();
+    }
+
+    return {group:group, plates:plates, label:label};
+  }
+
+  function addLights(scene){
+    var key = new THREE.DirectionalLight(0xfff1e0, 1.2);
+    key.position.set(4, 7, 5);
+    scene.add(key);
+    var fill = new THREE.DirectionalLight(0x8fb4ff, 0.3);
+    fill.position.set(-5, 3, -2);
+    scene.add(fill);
+    var rim = new THREE.DirectionalLight(0xff5a2b, 0.7);
+    rim.position.set(-3, 2, -6);
+    scene.add(rim);
+    var amb = new THREE.AmbientLight(0x2a1010, 0.55);
+    scene.add(amb);
+  }
+
+  function makeRenderer(container){
+    var renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    container.appendChild(renderer.domElement);
+    return renderer;
+  }
+
+  var clock = new THREE.Clock();
+
+  // ================= HERO SCENE =================
+  var heroWrap = document.getElementById('hero-canvas-wrap');
+  var heroScene = new THREE.Scene();
+  heroScene.fog = new THREE.FogExp2(0x0a0a0c, 0.045);
+  var heroCamera = new THREE.PerspectiveCamera(34, heroWrap.clientWidth/heroWrap.clientHeight, 0.1, 100);
+  var heroRenderer = makeRenderer(heroWrap);
+  addLights(heroScene);
+  var heroStack = buildLogoStack();
+  heroStack.group.position.x = 0.6;
+  heroScene.add(heroStack.group);
+
+  var baseCamPos = new THREE.Vector3(0, 4.4, 6.4);
+  var mouseX = 0, mouseY = 0, curX = 0, curY = 0;
+  window.addEventListener('mousemove', function(e){
+    mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+    mouseY = (e.clientY / window.innerHeight) * 2 - 1;
+  });
+
+  function animateHero(){
+    requestAnimationFrame(animateHero);
+    var t = clock.getElapsedTime();
+    if(!reduceMotion){
+      curX += (mouseX - curX) * 0.04;
+      curY += (mouseY - curY) * 0.04;
+      heroCamera.position.x = baseCamPos.x + curX * 0.9;
+      heroCamera.position.y = baseCamPos.y - curY * 0.5 + Math.sin(t*0.5)*0.06;
+      heroCamera.position.z = baseCamPos.z;
+      heroStack.group.position.y = Math.sin(t*0.6) * 0.05;
+    } else {
+      heroCamera.position.copy(baseCamPos);
+    }
+    heroCamera.lookAt(0.6, 0.1, 0);
+    heroRenderer.render(heroScene, heroCamera);
+  }
+  animateHero();
+
+  function resizeHero(){
+    var w = heroWrap.clientWidth, h = heroWrap.clientHeight;
+    heroCamera.aspect = w/h;
+    heroCamera.updateProjectionMatrix();
+    heroRenderer.setSize(w,h);
+  }
+  window.addEventListener('resize', resizeHero);
+
+  // ================= SCROLL-DRIVEN SCENE =================
+  var scrollWrap = document.getElementById('scroll-canvas-wrap');
+  var scrollScene = new THREE.Scene();
+  scrollScene.fog = new THREE.FogExp2(0x111114, 0.045);
+  var scrollCamera = new THREE.PerspectiveCamera(34, scrollWrap.clientWidth/scrollWrap.clientHeight, 0.1, 100);
+  var scrollRenderer = makeRenderer(scrollWrap);
+  addLights(scrollScene);
+  var scrollStack = buildLogoStack();
+  scrollScene.add(scrollStack.group);
+
+  var camState = {angle:0, height:4.6, radius:6.6};
+
+  function updateScrollCamera(){
+    scrollCamera.position.x = Math.sin(camState.angle) * camState.radius;
+    scrollCamera.position.z = Math.cos(camState.angle) * camState.radius;
+    scrollCamera.position.y = camState.height;
+    scrollCamera.lookAt(0, 0.1, 0);
+  }
+
+  function animateScrollScene(){
+    requestAnimationFrame(animateScrollScene);
+    if(!reduceMotion){
+      var t = clock.getElapsedTime();
+      scrollStack.group.position.y = Math.sin(t*0.5) * 0.04;
+    }
+    updateScrollCamera();
+    scrollRenderer.render(scrollScene, scrollCamera);
+  }
+  animateScrollScene();
+
+  function resizeScroll(){
+    var w = scrollWrap.clientWidth, h = scrollWrap.clientHeight;
+    scrollCamera.aspect = w/h;
+    scrollCamera.updateProjectionMatrix();
+    scrollRenderer.setSize(w,h);
+  }
+  window.addEventListener('resize', resizeScroll);
+
+  // scroll-tied camera orbit across the four feature blocks
+  if(window.gsap && window.ScrollTrigger && !reduceMotion){
+    var blocks = gsap.utils.toArray('.feature-block');
+    var states = [
+      {angle:0,    height:4.6, radius:6.6},
+      {angle:0.55, height:3.4, radius:5.6},
+      {angle:-0.5, height:5.6, radius:7.4},
+      {angle:0.15, height:2.6, radius:5.0}
+    ];
+
+    blocks.forEach(function(block, i){
+      ScrollTrigger.create({
+        trigger: block, start:'top center', end:'bottom center',
+        onEnter: function(){ setActive(i); },
+        onEnterBack: function(){ setActive(i); }
+      });
+    });
+
+    function setActive(i){
+      blocks.forEach(function(b, idx){ b.classList.toggle('is-active', idx===i); });
+      var s = states[i];
+      gsap.to(camState, {angle:s.angle, height:s.height, radius:s.radius, duration:1.1, ease:'power2.out'});
+    }
+    blocks[0] && blocks[0].classList.add('is-active');
+  } else {
+    document.querySelectorAll('.feature-block').forEach(function(b){ b.classList.add('is-active'); });
+  }
+
+  if(window.gsap && window.ScrollTrigger){
+    gsap.utils.toArray('.card').forEach(function(card){
+      gsap.fromTo(card, {opacity:0, y:18}, {
+        opacity:1, y:0, duration:0.6, ease:'power2.out',
+        scrollTrigger:{trigger:card, start:'top 90%'}
+      });
+    });
+  }
+
+})();
+</script>
+</body>
+</html>
