@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GiftDaun — скоро</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      margin: 0; height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: #0f0f17; color: #fff;
+      font-family: -apple-system, system-ui, sans-serif;
+      text-align: center; padding: 20px;
+    }
+    h1 { font-size: 42px; margin: 0 0 12px; }
+    p  { opacity: .75; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h1>🚧 В разработке</h1>
+  <p>Мини-приложение GiftDaun скоро появится.<br>Следите за каналом!</p>
+  <script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) { tg.ready(); tg.expand(); }
+  </script>
+</body>
+</html>
