@@ -1,29 +1,591 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GiftDaun — скоро</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      margin: 0; height: 100vh;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      background: #0f0f17; color: #fff;
-      font-family: -apple-system, system-ui, sans-serif;
-      text-align: center; padding: 20px;
-    }
-    h1 { font-size: 42px; margin: 0 0 12px; }
-    p  { opacity: .75; font-size: 18px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Random Games — GiftDaun</title>
+    <!-- Официальный скрипт Telegram для Mini Apps -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f0f17;
+            --card-bg: #1c1c26;
+            --text-main: #ffffff;
+            --text-muted: #8b8b9a;
+            --accent: #00d1ff; /* Неоновый голубой */
+            --accent-green: #00e676; /* Зеленый для "Подключить" */
+            --accent-gradient: linear-gradient(90deg, #ff9900, #ff5500);
+            --nav-bg: #15151e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 80px; /* Место под нижнее меню */
+            overflow-x: hidden;
+        }
+
+        /* --- ВЕРХНЯЯ ПАНЕЛЬ --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: var(--bg-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn-connect {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .stars-balance {
+            background: #1c1c26;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid #333;
+        }
+
+        /* --- БАННЕР --- */
+        .banner {
+            margin: 0 15px 20px;
+            background: linear-gradient(135deg, #ffb74d, #ff7043);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #000;
+            position: relative;
+            overflow: hidden;
+        }
+        .banner-text h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .banner-text p {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .banner-img {
+            font-size: 40px;
+            position: absolute;
+            right: 10px;
+            bottom: -5px;
+            transform: rotate(-10deg);
+        }
+
+        /* --- СЕКЦИИ И КАРТОЧКИ --- */
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 15px 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .scroll-row {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 0 15px 10px;
+            scrollbar-width: none; /* Firefox */
+        }
+        .scroll-row::-webkit-scrollbar {
+            display: none; /* Chrome */
+        }
+
+        .game-card {
+            min-width: 110px;
+            height: 140px;
+            border-radius: 15px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+        .game-card h3 {
+            font-size: 14px;
+            z-index: 2;
+        }
+        .game-card .icon {
+            font-size: 40px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.8;
+        }
+
+        /* Градиенты для игр */
+        .bg-apple { background: linear-gradient(180deg, #7b1fa2, #4a148c); }
+        .bg-rocket { background: linear-gradient(180deg, #e91e63, #c2185b); }
+        .bg-pvp { background: linear-gradient(180deg, #009688, #00695c); }
+        .bg-mines { background: linear-gradient(180deg, #d32f2f, #b71c1c); }
+        .bg-plinko { background: linear-gradient(180deg, #1976d2, #0d47a1); }
+        .bg-hockey { background: linear-gradient(180deg, #f57c00, #e65100); }
+
+        /* --- КЕЙСЫ (Вкладка) --- */
+        .grid-cases {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+        }
+        .case-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #2a2a35;
+        }
+        .case-card .case-img {
+            font-size: 60px;
+            margin: 10px 0;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
+        }
+        .case-card h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .case-card p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        .btn-buy {
+            background: #2a2a35;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            width: 100%;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-buy:active { background: #3a3a45; }
+
+        /* --- ЛИДЕРЫ --- */
+        .tabs-toggle {
+            display: flex;
+            background: var(--card-bg);
+            border-radius: 20px;
+            margin: 15px;
+            padding: 4px;
+        }
+        .tabs-toggle button {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .tabs-toggle button.active {
+            background: #333;
+            color: white;
+        }
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 10px;
+            margin: 20px 15px;
+            height: 150px;
+        }
+        .podium-place {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90px;
+        }
+        .podium-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #333;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+        }
+        .podium-name { font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+        .podium-score { font-size: 10px; color: #ffd700; margin-bottom: 5px; }
+        .podium-block {
+            width: 100%;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: rgba(0,0,0,0.5);
+        }
+        .p1 .podium-block { height: 80px; background: #ffd700; }
+        .p2 .podium-block { height: 60px; background: #c0c0c0; }
+        .p3 .podium-block { height: 40px; background: #cd7f32; }
+
+        /* --- ПРОФИЛЬ --- */
+        .profile-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid var(--accent-green);
+            background: #333;
+            margin-bottom: 15px;
+            object-fit: cover;
+        }
+        .profile-name { font-size: 24px; font-weight: bold; }
+        .profile-username { color: var(--accent); font-size: 14px; margin-bottom: 20px; }
+        
+        .stats-grid {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            padding: 0 15px;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .stat-value { font-size: 18px; font-weight: bold; }
+        .stat-label { font-size: 12px; color: var(--text-muted); }
+
+        .btn-give-gift {
+            background: var(--accent-green);
+            color: #000;
+            border: none;
+            padding: 15px;
+            border-radius: 15px;
+            width: calc(100% - 30px);
+            margin: 0 15px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        /* --- НИЖНЕЕ МЕНЮ --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: var(--nav-bg);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #2a2a35;
+            border-radius: 20px 20px 0 0;
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 10px;
+            gap: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 60px;
+        }
+        .nav-item .icon {
+            font-size: 20px;
+        }
+        .nav-item.active {
+            color: var(--accent-green);
+        }
+        .nav-item.active .icon {
+            filter: drop-shadow(0 0 5px var(--accent-green));
+        }
+
+        /* Утилиты */
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
-  <h1>🚧 В разработке</h1>
-  <p>Мини-приложение GiftDaun скоро появится.<br>Следите за каналом!</p>
-  <script>
-    const tg = window.Telegram?.WebApp;
-    if (tg) { tg.ready(); tg.expand(); }
-  </script>
+
+    <!-- ГЛАВНАЯ ВКЛАДКА -->
+    <div id="tab-home">
+        <div class="header">
+            <div class="header-title">Random Games</div>
+            <div class="header-actions">
+                <button class="btn-connect">🔗 Подключить</button>
+                <div class="stars-balance">⭐ 0 Stars</div>
+            </div>
+        </div>
+
+        <div class="banner">
+            <div class="banner-text">
+                <h2>Бесплатный кейс</h2>
+                <p>за подписку</p>
+            </div>
+            <div class="banner-img">🎁</div>
+        </div>
+
+        <div class="section-title">💧 Лучшие игры</div>
+        <div class="scroll-row">
+            <div class="game-card bg-apple">
+                <h3>Апгрейдер</h3>
+                <div class="icon">🍦</div>
+            </div>
+            <div class="game-card bg-rocket">
+                <h3>Ракетка</h3>
+                <div class="icon">🚀</div>
+            </div>
+            <div class="game-card bg-pvp">
+                <h3>PVP</h3>
+                <div class="icon">🎡</div>
+            </div>
+        </div>
+
+        <div class="section-title">⚡ Быстрые игры</div>
+        <div class="scroll-row">
+            <div class="game-card bg-mines">
+                <h3>Мины</h3>
+                <div class="icon">💣</div>
+            </div>
+            <div class="game-card bg-plinko">
+                <h3>Плинко</h3>
+                <div class="icon">⛏️</div>
+            </div>
+            <div class="game-card bg-hockey">
+                <h3>Хоккей</h3>
+                <div class="icon">🏒</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ВКЛАДКА КЕЙСЫ -->
+    <div id="tab-cases" class="hidden">
+        <div class="header">
+            <div class="header-title">Random Games</div>
+            <div class="header-actions">
+                <button class="btn-connect">🔗 Подключить</button>
+                <div class="stars-balance">⭐ 0 Stars</div>
+            </div>
+        </div>
+
+        <div class="grid-cases">
+            <div class="case-card">
+                <div class="case-img">🎃</div>
+                <h3>Free Case</h3>
+                <p>У вас 0 кейсов</p>
+                <button class="btn-buy">⭐ 0</button>
+            </div>
+            <div class="case-card">
+                <div class="case-img">💀</div>
+                <h3>Gothic Case</h3>
+                <p>У вас 0 кейсов</p>
+                <button class="btn-buy">⭐ 50</button>
+            </div>
+            <div class="case-card">
+                <div class="case-img">🏆</div>
+                <h3>Rich Case</h3>
+                <p>У вас 0 кейсов</p>
+                <button class="btn-buy">⭐ 300</button>
+            </div>
+            <div class="case-card">
+                <div class="case-img">👽</div>
+                <h3>Alien Case</h3>
+                <p>У вас 0 кейсов</p>
+                <button class="btn-buy">⭐ 500</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ВКЛАДКА ЛИДЕРЫ -->
+    <div id="tab-leaders" class="hidden">
+        <div class="header">
+            <div class="header-title">Random Games</div>
+            <div class="header-actions">
+                <button class="btn-connect">🔗 Подключить</button>
+                <div class="stars-balance">⭐ 0 Stars</div>
+            </div>
+        </div>
+
+        <div class="tabs-toggle">
+            <button class="active">Общий</button>
+            <button>PVP</button>
+        </div>
+
+        <div class="podium">
+            <div class="podium-place p2">
+                <div class="podium-avatar">👤</div>
+                <div class="podium-name">Lana</div>
+                <div class="podium-score">52 613 ⭐</div>
+                <div class="podium-block">2</div>
+            </div>
+            <div class="podium-place p1">
+                <div class="podium-avatar" style="border: 2px solid #ffd700;">👤</div>
+                <div class="podium-name">лиза насилие</div>
+                <div class="podium-score">104 570 ⭐</div>
+                <div class="podium-block">1</div>
+            </div>
+            <div class="podium-place p3">
+                <div class="podium-avatar">👤</div>
+                <div class="podium-name">Skorpions...</div>
+                <div class="podium-score">43 122 ⭐</div>
+                <div class="podium-block">3</div>
+            </div>
+        </div>
+        <div style="text-align: center; font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">
+            Рейтинг обновится через 6 дней
+        </div>
+    </div>
+
+    <!-- ВКЛАДКА ПРОФИЛЬ -->
+    <div id="tab-profile" class="hidden">
+        <div class="header">
+            <div class="header-title">Random Games</div>
+            <div class="header-actions">
+                <button class="btn-connect">🔗 Подключить</button>
+                <div class="stars-balance">⭐ 0 Stars</div>
+            </div>
+        </div>
+
+        <div class="profile-header">
+            <!-- Сюда подставится аватарка из Telegram -->
+            <img src="https://via.placeholder.com/100" alt="Avatar" class="profile-avatar" id="user-avatar">
+            <!-- Сюда подставится имя из Telegram -->
+            <div class="profile-name" id="user-name">Загрузка...</div>
+            <div class="profile-username" id="user-username">@username</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value">0</div>
+                <div class="stat-label">Рефералов</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">0</div>
+                <div class="stat-label">Побед</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">0</div>
+                <div class="stat-label">Дней с нами</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">0</div>
+                <div class="stat-label">Лучший выигрыш</div>
+            </div>
+        </div>
+
+        <div style="margin: 20px 15px;">
+            <div style="background: var(--card-bg); border-radius: 15px; padding: 15px; text-align: center;">
+                <div style="font-size: 40px; margin-bottom: 10px;">🎁</div>
+                <h3 style="margin-bottom: 5px;">Мои подарки</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">У вас пока нет подарков</p>
+                <button class="btn-give-gift">Пополнить подарки</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- НИЖНЕЕ МЕНЮ -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home', this)">
+            <div class="icon">🏠</div>
+            <div>Главная</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('cases', this)">
+            <div class="icon">📦</div>
+            <div>Кейсы</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('leaders', this)">
+            <div class="icon">🏆</div>
+            <div>Лидеры</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('profile', this)">
+            <div class="icon">👤</div>
+            <div>Профиль</div>
+        </div>
+    </div>
+
+    <script>
+        // 1. Инициализация Telegram WebApp
+        const tg = window.Telegram?.WebApp;
+        
+        if (tg) {
+            tg.ready();
+            tg.expand(); // Разворачиваем на весь экран
+
+            // Подтягиваем данные пользователя в профиль
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                document.getElementById('user-name').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+                document.getElementById('user-username').innerText = user.username ? '@' + user.username : 'Нет юзернейма';
+                
+                if (user.photo_url) {
+                    document.getElementById('user-avatar').src = user.photo_url;
+                } else {
+                    // Если аватарки нет - ставим заглушку с первой буквой имени
+                    document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${user.first_name}&background=00e676&color=000&bold=true&size=100`;
+                }
+            }
+        }
+
+        // 2. Логика переключения вкладок (SPA)
+        function switchTab(tabName, navElement) {
+            // Скрываем все вкладки
+            document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
+            
+            // Показываем нужную
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+
+            // Меняем активный цвет иконки в меню
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            navElement.classList.add('active');
+        }
+    </script>
 </body>
 </html>
