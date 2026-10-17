@@ -1,591 +1,123 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Random Games — GiftDaun</title>
-    <!-- Официальный скрипт Telegram для Mini Apps -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root {
-            --bg-color: #0f0f17;
-            --card-bg: #1c1c26;
-            --text-main: #ffffff;
-            --text-muted: #8b8b9a;
-            --accent: #00d1ff; /* Неоновый голубой */
-            --accent-green: #00e676; /* Зеленый для "Подключить" */
-            --accent-gradient: linear-gradient(90deg, #ff9900, #ff5500);
-            --nav-bg: #15151e;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding-bottom: 80px; /* Место под нижнее меню */
-            overflow-x: hidden;
-        }
-
-        /* --- ВЕРХНЯЯ ПАНЕЛЬ --- */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: var(--bg-color);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        .header-title {
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .header-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .btn-connect {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .stars-balance {
-            background: #1c1c26;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            border: 1px solid #333;
-        }
-
-        /* --- БАННЕР --- */
-        .banner {
-            margin: 0 15px 20px;
-            background: linear-gradient(135deg, #ffb74d, #ff7043);
-            border-radius: 15px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #000;
-            position: relative;
-            overflow: hidden;
-        }
-        .banner-text h2 {
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-        .banner-text p {
-            font-size: 14px;
-            font-weight: 500;
-        }
-        .banner-img {
-            font-size: 40px;
-            position: absolute;
-            right: 10px;
-            bottom: -5px;
-            transform: rotate(-10deg);
-        }
-
-        /* --- СЕКЦИИ И КАРТОЧКИ --- */
-        .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 20px 15px 10px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .scroll-row {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 0 15px 10px;
-            scrollbar-width: none; /* Firefox */
-        }
-        .scroll-row::-webkit-scrollbar {
-            display: none; /* Chrome */
-        }
-
-        .game-card {
-            min-width: 110px;
-            height: 140px;
-            border-radius: 15px;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-        }
-        .game-card h3 {
-            font-size: 14px;
-            z-index: 2;
-        }
-        .game-card .icon {
-            font-size: 40px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0.8;
-        }
-
-        /* Градиенты для игр */
-        .bg-apple { background: linear-gradient(180deg, #7b1fa2, #4a148c); }
-        .bg-rocket { background: linear-gradient(180deg, #e91e63, #c2185b); }
-        .bg-pvp { background: linear-gradient(180deg, #009688, #00695c); }
-        .bg-mines { background: linear-gradient(180deg, #d32f2f, #b71c1c); }
-        .bg-plinko { background: linear-gradient(180deg, #1976d2, #0d47a1); }
-        .bg-hockey { background: linear-gradient(180deg, #f57c00, #e65100); }
-
-        /* --- КЕЙСЫ (Вкладка) --- */
-        .grid-cases {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            padding: 15px;
-        }
-        .case-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #2a2a35;
-        }
-        .case-card .case-img {
-            font-size: 60px;
-            margin: 10px 0;
-            filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
-        }
-        .case-card h3 {
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-        .case-card p {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-        }
-        .btn-buy {
-            background: #2a2a35;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 10px;
-            width: 100%;
-            font-weight: bold;
-            font-size: 14px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-        }
-        .btn-buy:active { background: #3a3a45; }
-
-        /* --- ЛИДЕРЫ --- */
-        .tabs-toggle {
-            display: flex;
-            background: var(--card-bg);
-            border-radius: 20px;
-            margin: 15px;
-            padding: 4px;
-        }
-        .tabs-toggle button {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            padding: 10px;
-            border-radius: 15px;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        .tabs-toggle button.active {
-            background: #333;
-            color: white;
-        }
-        .podium {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            gap: 10px;
-            margin: 20px 15px;
-            height: 150px;
-        }
-        .podium-place {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 90px;
-        }
-        .podium-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #333;
-            margin-bottom: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-        }
-        .podium-name { font-size: 12px; font-weight: bold; margin-bottom: 2px; }
-        .podium-score { font-size: 10px; color: #ffd700; margin-bottom: 5px; }
-        .podium-block {
-            width: 100%;
-            border-radius: 10px 10px 0 0;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            padding-bottom: 10px;
-            font-size: 24px;
-            font-weight: bold;
-            color: rgba(0,0,0,0.5);
-        }
-        .p1 .podium-block { height: 80px; background: #ffd700; }
-        .p2 .podium-block { height: 60px; background: #c0c0c0; }
-        .p3 .podium-block { height: 40px; background: #cd7f32; }
-
-        /* --- ПРОФИЛЬ --- */
-        .profile-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20px;
-        }
-        .profile-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: 3px solid var(--accent-green);
-            background: #333;
-            margin-bottom: 15px;
-            object-fit: cover;
-        }
-        .profile-name { font-size: 24px; font-weight: bold; }
-        .profile-username { color: var(--accent); font-size: 14px; margin-bottom: 20px; }
-        
-        .stats-grid {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            padding: 0 15px;
-            margin-bottom: 20px;
-        }
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .stat-value { font-size: 18px; font-weight: bold; }
-        .stat-label { font-size: 12px; color: var(--text-muted); }
-
-        .btn-give-gift {
-            background: var(--accent-green);
-            color: #000;
-            border: none;
-            padding: 15px;
-            border-radius: 15px;
-            width: calc(100% - 30px);
-            margin: 0 15px;
-            font-weight: bold;
-            font-size: 16px;
-            text-align: center;
-        }
-
-        /* --- НИЖНЕЕ МЕНЮ --- */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 70px;
-            background: var(--nav-bg);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid #2a2a35;
-            border-radius: 20px 20px 0 0;
-            z-index: 100;
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-muted);
-            font-size: 10px;
-            gap: 4px;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 60px;
-        }
-        .nav-item .icon {
-            font-size: 20px;
-        }
-        .nav-item.active {
-            color: var(--accent-green);
-        }
-        .nav-item.active .icon {
-            filter: drop-shadow(0 0 5px var(--accent-green));
-        }
-
-        /* Утилиты */
-        .hidden { display: none !important; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#090a0f">
+<title>GIFT DAUN — Telegram Gifts</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#090a0f;--surface:#11131b;--surface2:#171a24;--surface3:#202433;--stroke:#2a2e3d;--text:#f7f7fb;--muted:#9298ac;--purple:#9b7cff;--purple2:#6f4de6;--cyan:#72d9ff;--green:#67e0ad;--gold:#ffd27b;--red:#ff738b}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 60% -15%,#35245c 0,transparent 38%),var(--bg);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}button{font:inherit;color:inherit;border:0;cursor:pointer;transition:transform .18s,filter .18s,border-color .18s}button:hover{filter:brightness(1.1)}button:active{transform:scale(.98)}button:disabled{opacity:.45;cursor:not-allowed;filter:none}.shell{max-width:1240px;margin:auto;padding:22px 24px 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px;min-width:0}.brandmark{width:45px;height:45px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(145deg,#c0a8ff,#7251e7);box-shadow:0 8px 28px #8e6aff38;font-size:24px;color:#fff}.brandname{font-size:18px;font-weight:950;letter-spacing:1.4px}.brandname span{color:#b5a0ff}.brandsub{font-size:10px;color:var(--muted);letter-spacing:2px;margin-top:1px}.topright{display:flex;align-items:center;gap:10px}.wallet-pill{display:flex;align-items:center;gap:8px;border:1px solid var(--stroke);background:#151722;padding:10px 13px;border-radius:13px;font-weight:850;white-space:nowrap}.star{color:var(--gold)}.btn{border-radius:12px;padding:11px 15px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:8px}.btn-primary{background:linear-gradient(130deg,#a58aff,#7652ed);box-shadow:0 8px 24px #7956ed32}.btn-ghost{background:#1a1d28;border:1px solid var(--stroke)}.btn-small{padding:9px 11px;font-size:12px}.profile-strip{display:flex;align-items:center;gap:10px;padding:7px 12px 7px 7px;background:#12141c;border:1px solid var(--stroke);border-radius:15px;max-width:230px}.avatar{width:37px;height:37px;border-radius:12px;background:linear-gradient(135deg,#a58aff,#4b3c99);display:grid;place-items:center;font-weight:900;overflow:hidden;flex-shrink:0}.avatar img{width:100%;height:100%;object-fit:cover}.profile-info{min-width:0}.profile-info strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}.profile-info small{color:var(--muted);font-size:11px}.layout{display:grid;grid-template-columns:218px minmax(0,1fr);gap:18px}.sidebar{align-self:start;position:sticky;top:16px;background:#10121a;border:1px solid var(--stroke);border-radius:18px;padding:10px}.nav{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:12px 13px;margin:2px 0;background:transparent;color:#a7adbf;border-radius:12px;font-weight:700}.nav .ico{width:23px;text-align:center;font-size:17px}.nav.active{background:linear-gradient(100deg,#30264d,#201c33);color:white;box-shadow:inset 0 0 0 1px #56447e}.nav.active .ico{color:#c2aeff}.nav:hover{background:#1b1e2a;color:white}.sidebar-line{height:1px;background:var(--stroke);margin:12px 5px}.side-status{padding:8px 10px;color:var(--muted);font-size:11px}.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:6px;box-shadow:0 0 10px #67e0ad66}
+main{min-width:0}.view{display:none}.view.active{display:block}.hero{position:relative;min-height:242px;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:30px 32px;border-radius:22px;border:1px solid #3b3158;background:radial-gradient(ellipse at 80% 50%,#4b3279 0,transparent 35%),linear-gradient(110deg,#211a34,#171927 60%,#20213a)}.hero:after{content:"";position:absolute;width:270px;height:270px;right:55px;top:-100px;border:1px solid #ffffff12;border-radius:50%;box-shadow:0 0 0 25px #ffffff05,0 0 0 55px #ffffff03}.hero-copy{position:relative;z-index:1;max-width:570px}.kicker{font-size:10px;letter-spacing:2.3px;color:#c5b4ff;font-weight:900}.hero h1{font-size:clamp(30px,4vw,48px);letter-spacing:-1.6px;line-height:1.03;margin:12px 0}.hero h1 span{background:linear-gradient(90deg,#c7b8ff,#8c72ff);background-clip:text;color:transparent}.hero p{color:#b7b8ca;max-width:440px;margin:0 0 21px}.hero-art{position:relative;z-index:1;width:170px;height:170px;display:grid;place-items:center;font-size:94px;flex-shrink:0;border-radius:42px;background:linear-gradient(145deg,#ffffff1a,#ffffff03);border:1px solid #ffffff20;transform:rotate(7deg);box-shadow:0 22px 55px #0003}.hero-art span{transform:rotate(-7deg);filter:drop-shadow(0 12px 20px #b9a1ff40)}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:15px 0 27px}.metric{padding:15px 17px;border:1px solid var(--stroke);background:linear-gradient(145deg,#151721,#10121a);border-radius:15px}.metric-label{font-size:11px;color:var(--muted);margin-bottom:7px}.metric-value{font-size:21px;font-weight:900;letter-spacing:-.4px}.metric-note{font-size:10px;color:#7f879c;margin-top:3px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:25px 0 13px}.section-head h2{margin:0;font-size:19px;letter-spacing:-.4px}.section-head p{margin:4px 0 0;color:var(--muted);font-size:12px}.text-link{background:transparent;color:#b5a1ff;font-weight:800;font-size:12px;padding:5px}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.feature-card,.gift-card,.case-card{background:linear-gradient(155deg,#191c27,#11131a);border:1px solid var(--stroke);border-radius:17px;overflow:hidden;min-width:0}.feature-card{padding:16px;text-align:left}.feature-art{height:95px;border-radius:12px;background:radial-gradient(circle at 50% 30%,#40345e,#222331 72%);display:grid;place-items:center;font-size:47px;margin-bottom:13px}.feature-card h3,.gift-card h3,.case-card h3{margin:0 0 4px;font-size:14px}.feature-card p,.gift-card p,.case-card p{margin:0;color:var(--muted);font-size:11px}.feature-foot{display:flex;align-items:center;justify-content:space-between;margin-top:13px;gap:6px}.tag{display:inline-flex;align-items:center;gap:5px;border:1px solid #3b3355;background:#252039;color:#c7b8ff;padding:5px 8px;border-radius:8px;font-size:10px;font-weight:800}.case-card{padding:13px}.case-visual{height:140px;border-radius:12px;background:radial-gradient(circle at 50% 35%,#4e3b79,#252333 65%,#1a1b25);display:grid;place-items:center;position:relative;overflow:hidden;margin-bottom:13px}.case-visual:before{content:"";position:absolute;width:125px;height:125px;border-radius:50%;border:1px solid #ffffff15;box-shadow:0 0 0 15px #ffffff04}.case-visual .gift-emoji{position:relative;font-size:66px;filter:drop-shadow(0 10px 15px #0007)}.case-price{color:var(--gold);font-weight:900;white-space:nowrap}.case-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:13px}.gift-card{padding:12px}.gift-image{height:132px;border-radius:12px;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,#3c3654,#1c1e29 72%);font-size:65px;position:relative;margin-bottom:12px}.gift-image img{width:100%;height:100%;object-fit:contain;padding:8px}.gift-badge{position:absolute;top:8px;left:8px;border-radius:7px;padding:4px 6px;font-size:9px;font-weight:900;background:#252039;color:#c8b9ff;border:1px solid #524275}.gift-meta{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-top:12px}.gift-price{font-weight:900;color:var(--gold);font-size:12px}.panel{background:linear-gradient(155deg,#151721,#101219);border:1px solid var(--stroke);border-radius:18px;padding:22px}.panel h2{font-size:22px;margin:0 0 6px}.muted{color:var(--muted)}.panel-sub{margin:0 0 20px;color:var(--muted);font-size:13px}.freecase{display:grid;grid-template-columns:190px minmax(0,1fr);gap:24px;align-items:center}.freecase-art{min-height:190px;display:grid;place-items:center;font-size:94px;border-radius:16px;background:radial-gradient(circle,#4a3770,#222230 65%);border:1px solid #3a3156}.freecase h3{font-size:20px;margin:0 0 8px}.freecase p{color:var(--muted);margin:0 0 15px}.hint{padding:12px 14px;background:#1c1b2c;border:1px solid #393151;color:#bfb4e7;border-radius:12px;font-size:12px;margin-top:15px}.profile-header{display:flex;align-items:center;gap:15px;margin-bottom:23px}.big-avatar{width:70px;height:70px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(135deg,#bba4ff,#6345d2);font-size:30px;overflow:hidden}.big-avatar img{width:100%;height:100%;object-fit:cover}.profile-header h2{margin:0 0 4px}.profile-header p{margin:0;color:var(--muted)}.pill{font-size:10px;color:var(--green);border:1px solid #275844;background:#14261f;padding:5px 8px;border-radius:7px;display:inline-block;margin-top:8px}.formrow{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.input{min-width:0;flex:1;background:#0b0d13;border:1px solid #343849;border-radius:11px;color:white;padding:12px;outline:none}.input:focus{border-color:#8d72ff}.history{display:grid;gap:8px}.history-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;background:#10121a;border:1px solid var(--stroke);border-radius:12px}.history-row small{display:block;color:var(--muted);margin-top:2px}.history-amount{font-weight:850;white-space:nowrap}.green{color:var(--green)}.yellow{color:var(--gold)}.empty{padding:30px 15px;text-align:center;color:var(--muted);border:1px dashed #35394a;border-radius:13px}.toast{position:fixed;z-index:20;bottom:22px;left:50%;transform:translate(-50%,18px);background:#222535;border:1px solid #454b60;border-radius:12px;padding:12px 17px;box-shadow:0 15px 45px #0009;opacity:0;pointer-events:none;transition:.2s;max-width:calc(100vw - 28px);text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}.bottom-nav{display:none}.footer{text-align:center;color:#646b7d;font-size:11px;padding:26px 0 0}.loading{opacity:.6;pointer-events:none}
+@media(max-width:900px){.shell{padding:16px}.layout{grid-template-columns:1fr}.sidebar{position:static;display:flex;overflow-x:auto;gap:3px;padding:7px}.nav{width:auto;white-space:nowrap;flex-shrink:0;padding:10px 12px}.nav .ico{width:auto}.sidebar-line,.side-status{display:none}.hero{min-height:220px}.hero-art{width:135px;height:135px;font-size:75px}.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){.shell{padding:12px 12px 30px}.top{align-items:flex-start;flex-wrap:wrap}.topright{width:100%;justify-content:space-between}.profile-strip{max-width:none;flex:1}.wallet-pill{padding:10px}.hero{padding:23px 20px;min-height:210px}.hero-art{position:absolute;right:-20px;bottom:-20px;width:120px;height:120px;font-size:64px;opacity:.38}.hero-copy{max-width:100%}.hero h1{font-size:35px}.hero p{max-width:340px;font-size:13px}.metrics{gap:8px}.metric{padding:12px 10px}.metric-label{font-size:9px}.metric-value{font-size:17px}.metric-note{font-size:9px}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.case-visual{height:118px}.gift-image{height:112px}.section-head h2{font-size:17px}.panel{padding:15px}.freecase{grid-template-columns:1fr;gap:15px}.freecase-art{min-height:140px;font-size:75px}.brandname{font-size:16px}.brandsub{letter-spacing:1.4px}.brandmark{width:40px;height:40px}.wallet-pill{font-size:12px}.nav{font-size:12px}.nav .ico{font-size:15px}.footer{padding-bottom:12px}}
+</style>
 </head>
 <body>
-
-    <!-- ГЛАВНАЯ ВКЛАДКА -->
-    <div id="tab-home">
-        <div class="header">
-            <div class="header-title">Random Games</div>
-            <div class="header-actions">
-                <button class="btn-connect">🔗 Подключить</button>
-                <div class="stars-balance">⭐ 0 Stars</div>
-            </div>
-        </div>
-
-        <div class="banner">
-            <div class="banner-text">
-                <h2>Бесплатный кейс</h2>
-                <p>за подписку</p>
-            </div>
-            <div class="banner-img">🎁</div>
-        </div>
-
-        <div class="section-title">💧 Лучшие игры</div>
-        <div class="scroll-row">
-            <div class="game-card bg-apple">
-                <h3>Апгрейдер</h3>
-                <div class="icon">🍦</div>
-            </div>
-            <div class="game-card bg-rocket">
-                <h3>Ракетка</h3>
-                <div class="icon">🚀</div>
-            </div>
-            <div class="game-card bg-pvp">
-                <h3>PVP</h3>
-                <div class="icon">🎡</div>
-            </div>
-        </div>
-
-        <div class="section-title">⚡ Быстрые игры</div>
-        <div class="scroll-row">
-            <div class="game-card bg-mines">
-                <h3>Мины</h3>
-                <div class="icon">💣</div>
-            </div>
-            <div class="game-card bg-plinko">
-                <h3>Плинко</h3>
-                <div class="icon">⛏️</div>
-            </div>
-            <div class="game-card bg-hockey">
-                <h3>Хоккей</h3>
-                <div class="icon">🏒</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ВКЛАДКА КЕЙСЫ -->
-    <div id="tab-cases" class="hidden">
-        <div class="header">
-            <div class="header-title">Random Games</div>
-            <div class="header-actions">
-                <button class="btn-connect">🔗 Подключить</button>
-                <div class="stars-balance">⭐ 0 Stars</div>
-            </div>
-        </div>
-
-        <div class="grid-cases">
-            <div class="case-card">
-                <div class="case-img">🎃</div>
-                <h3>Free Case</h3>
-                <p>У вас 0 кейсов</p>
-                <button class="btn-buy">⭐ 0</button>
-            </div>
-            <div class="case-card">
-                <div class="case-img">💀</div>
-                <h3>Gothic Case</h3>
-                <p>У вас 0 кейсов</p>
-                <button class="btn-buy">⭐ 50</button>
-            </div>
-            <div class="case-card">
-                <div class="case-img">🏆</div>
-                <h3>Rich Case</h3>
-                <p>У вас 0 кейсов</p>
-                <button class="btn-buy">⭐ 300</button>
-            </div>
-            <div class="case-card">
-                <div class="case-img">👽</div>
-                <h3>Alien Case</h3>
-                <p>У вас 0 кейсов</p>
-                <button class="btn-buy">⭐ 500</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ВКЛАДКА ЛИДЕРЫ -->
-    <div id="tab-leaders" class="hidden">
-        <div class="header">
-            <div class="header-title">Random Games</div>
-            <div class="header-actions">
-                <button class="btn-connect">🔗 Подключить</button>
-                <div class="stars-balance">⭐ 0 Stars</div>
-            </div>
-        </div>
-
-        <div class="tabs-toggle">
-            <button class="active">Общий</button>
-            <button>PVP</button>
-        </div>
-
-        <div class="podium">
-            <div class="podium-place p2">
-                <div class="podium-avatar">👤</div>
-                <div class="podium-name">Lana</div>
-                <div class="podium-score">52 613 ⭐</div>
-                <div class="podium-block">2</div>
-            </div>
-            <div class="podium-place p1">
-                <div class="podium-avatar" style="border: 2px solid #ffd700;">👤</div>
-                <div class="podium-name">лиза насилие</div>
-                <div class="podium-score">104 570 ⭐</div>
-                <div class="podium-block">1</div>
-            </div>
-            <div class="podium-place p3">
-                <div class="podium-avatar">👤</div>
-                <div class="podium-name">Skorpions...</div>
-                <div class="podium-score">43 122 ⭐</div>
-                <div class="podium-block">3</div>
-            </div>
-        </div>
-        <div style="text-align: center; font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">
-            Рейтинг обновится через 6 дней
-        </div>
-    </div>
-
-    <!-- ВКЛАДКА ПРОФИЛЬ -->
-    <div id="tab-profile" class="hidden">
-        <div class="header">
-            <div class="header-title">Random Games</div>
-            <div class="header-actions">
-                <button class="btn-connect">🔗 Подключить</button>
-                <div class="stars-balance">⭐ 0 Stars</div>
-            </div>
-        </div>
-
-        <div class="profile-header">
-            <!-- Сюда подставится аватарка из Telegram -->
-            <img src="https://via.placeholder.com/100" alt="Avatar" class="profile-avatar" id="user-avatar">
-            <!-- Сюда подставится имя из Telegram -->
-            <div class="profile-name" id="user-name">Загрузка...</div>
-            <div class="profile-username" id="user-username">@username</div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-value">0</div>
-                <div class="stat-label">Рефералов</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">0</div>
-                <div class="stat-label">Побед</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">0</div>
-                <div class="stat-label">Дней с нами</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">0</div>
-                <div class="stat-label">Лучший выигрыш</div>
-            </div>
-        </div>
-
-        <div style="margin: 20px 15px;">
-            <div style="background: var(--card-bg); border-radius: 15px; padding: 15px; text-align: center;">
-                <div style="font-size: 40px; margin-bottom: 10px;">🎁</div>
-                <h3 style="margin-bottom: 5px;">Мои подарки</h3>
-                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">У вас пока нет подарков</p>
-                <button class="btn-give-gift">Пополнить подарки</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- НИЖНЕЕ МЕНЮ -->
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('home', this)">
-            <div class="icon">🏠</div>
-            <div>Главная</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('cases', this)">
-            <div class="icon">📦</div>
-            <div>Кейсы</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('leaders', this)">
-            <div class="icon">🏆</div>
-            <div>Лидеры</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('profile', this)">
-            <div class="icon">👤</div>
-            <div>Профиль</div>
-        </div>
-    </div>
-
-    <script>
-        // 1. Инициализация Telegram WebApp
-        const tg = window.Telegram?.WebApp;
-        
-        if (tg) {
-            tg.ready();
-            tg.expand(); // Разворачиваем на весь экран
-
-            // Подтягиваем данные пользователя в профиль
-            const user = tg.initDataUnsafe?.user;
-            if (user) {
-                document.getElementById('user-name').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-                document.getElementById('user-username').innerText = user.username ? '@' + user.username : 'Нет юзернейма';
-                
-                if (user.photo_url) {
-                    document.getElementById('user-avatar').src = user.photo_url;
-                } else {
-                    // Если аватарки нет - ставим заглушку с первой буквой имени
-                    document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${user.first_name}&background=00e676&color=000&bold=true&size=100`;
-                }
-            }
-        }
-
-        // 2. Логика переключения вкладок (SPA)
-        function switchTab(tabName, navElement) {
-            // Скрываем все вкладки
-            document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
-            
-            // Показываем нужную
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
-
-            // Меняем активный цвет иконки в меню
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            navElement.classList.add('active');
-        }
-    </script>
+<div class="shell">
+<header class="top">
+ <div class="brand"><div class="brandmark">✦</div><div><div class="brandname">GIFT <span>DAUN</span></div><div class="brandsub">TELEGRAM GIFTS CLUB</div></div></div>
+ <div class="topright">
+  <div class="profile-strip"><div class="avatar" id="topAvatar">G</div><div class="profile-info"><strong id="topName">Гость</strong><small id="topHandle">Открой в Telegram</small></div><span style="margin-left:auto;color:var(--green)">●</span></div>
+  <div class="wallet-pill"><span class="star">★</span><span id="starBalance">0</span><span style="color:var(--muted);font-size:11px">Stars*</span></div>
+  <button class="btn btn-primary" onclick="showView('shop')">Пополнить</button>
+ </div>
+</header>
+<div class="layout">
+<aside class="sidebar">
+ <button class="nav active" data-view="home" onclick="showView('home')"><span class="ico">⌂</span> Главная</button>
+ <button class="nav" data-view="cases" onclick="showView('cases')"><span class="ico">🎁</span> Кейсы</button>
+ <button class="nav" data-view="shop" onclick="showView('shop')"><span class="ico">★</span> Stars и подарки</button>
+ <button class="nav" data-view="inventory" onclick="showView('inventory')"><span class="ico">▦</span> Инвентарь</button>
+ <button class="nav" data-view="profile" onclick="showView('profile')"><span class="ico">◉</span> Профиль</button>
+ <div class="sidebar-line"></div><div class="side-status"><span class="status-dot"></span><span id="connectionText">Демо-режим</span></div>
+</aside>
+<main>
+<section id="home" class="view active">
+ <div class="hero"><div class="hero-copy"><div class="kicker">YOUR COLLECTION STARTS HERE</div><h1>Подарки, которые<br><span>хочется забрать.</span></h1><p>Открывай бесплатные кейсы, собирай коллекцию и следи за Telegram-подарками в одном месте.</p><button class="btn btn-primary" onclick="showView('cases')">Забрать бесплатный кейс <span>→</span></button></div><div class="hero-art"><span>🎁</span></div></div>
+ <div class="metrics"><div class="metric"><div class="metric-label">БАЛАНС STARS*</div><div class="metric-value"><span class="star">★</span> <span id="metricStars">0</span></div><div class="metric-note">Подтверждённые начисления</div></div><div class="metric"><div class="metric-label">МОЯ КОЛЛЕКЦИЯ</div><div class="metric-value" id="metricItems">0 предметов</div><div class="metric-note">Предметы из кейсов</div></div><div class="metric"><div class="metric-label">БЕСПЛАТНЫЕ КЕЙСЫ</div><div class="metric-value" id="metricFree">1 доступен</div><div class="metric-note">Обновляется на сервере</div></div></div>
+ <div class="section-head"><div><h2>Твой старт</h2><p>Начни с бесплатного открытия</p></div><button class="text-link" onclick="showView('cases')">Все кейсы ↗</button></div>
+ <div class="cards">
+  <button class="feature-card" onclick="showView('cases')"><div class="feature-art">🎁</div><h3>Free Drop</h3><p>Бесплатный кейс для каждого</p><div class="feature-foot"><span class="tag">FREE</span><span>→</span></div></button>
+  <button class="feature-card" onclick="showView('shop')"><div class="feature-art">⭐</div><h3>Stars Shop</h3><p>Покупки через Telegram Stars</p><div class="feature-foot"><span class="tag">TELEGRAM</span><span>→</span></div></button>
+  <button class="feature-card" onclick="showView('inventory')"><div class="feature-art">💎</div><h3>Коллекция</h3><p>Твои полученные предметы</p><div class="feature-foot"><span class="tag">INVENTORY</span><span>→</span></div></button>
+ </div>
+ <div class="hint">* Баланс Stars в интерфейсе — внутренний баланс приложения. Настоящие платежи и подарки требуют серверной проверки через Telegram Bot API.</div>
+</section>
+<section id="cases" class="view">
+ <div class="section-head"><div><h2>Кейсы</h2><p>Открывай кейсы и пополняй коллекцию</p></div></div>
+ <div class="panel freecase"><div class="freecase-art">🎁</div><div><div class="kicker">DAILY DROP</div><h3>Бесплатный кейс</h3><p>Одно бесплатное открытие в демо-сессии. Предмет будет добавлен в локальный инвентарь. В production доступность и награды должны проверяться сервером.</p><button id="freeCaseBtn" class="btn btn-primary" onclick="openFreeCase()">Открыть бесплатно <span>→</span></button><div class="hint">Это демонстрационный дроп: он не выдаёт настоящий Telegram NFT и не имеет денежной стоимости.</div></div></div>
+ <div class="section-head"><div><h2>Коллекционные серии</h2><p>Визуальный каталог будущих коллекций</p></div></div>
+ <div class="cards" id="caseCards"></div>
+</section>
+<section id="shop" class="view">
+ <div class="section-head"><div><h2>Stars и подарки</h2><p>Оплата должна подтверждаться Telegram и сервером</p></div></div>
+ <div class="panel" style="margin-bottom:16px"><div class="kicker">TELEGRAM STARS</div><h2 style="margin-top:7px">Пополнение баланса</h2><p class="panel-sub">Сейчас платёжный backend не подключён. Кнопки ниже показывают пакеты интерфейса, но не списывают Stars и не имитируют успешную оплату.</p><div class="cards" id="starPacks"></div><div class="hint">Чтобы принимать настоящие Stars, бот должен создавать invoice link, а backend — обрабатывать pre_checkout_query и successful_payment. Баланс начисляется только после подтверждения платежа.</div></div>
+ <div class="section-head"><div><h2>Подарки Telegram</h2><p>Примеры карточек каталога — не подтверждённые предложения к покупке</p></div></div>
+ <div class="cards" id="giftCatalog"></div>
+ <div class="hint">Реальные подарки и коллекционные характеристики нужно подгружать из подтверждённого источника или своей базы каталога. Этот прототип намеренно не выдаёт эмодзи за настоящие NFT.</div>
+</section>
+<section id="inventory" class="view">
+ <div class="section-head"><div><h2>Мой инвентарь</h2><p>Полученные в этой демонстрации предметы</p></div><span class="tag" id="inventoryCount">0 ITEMS</span></div>
+ <div class="cards" id="inventoryCards"></div>
+ <div id="inventoryEmpty" class="empty">🎒<br><br>Коллекция пока пустая.<br>Открой бесплатный кейс, чтобы получить первый предмет.</div>
+</section>
+<section id="profile" class="view">
+ <div class="panel"><div class="profile-header"><div class="big-avatar" id="bigAvatar">G</div><div><h2 id="profileName">Гость</h2><p id="profileUsername">Открой приложение внутри Telegram</p><span class="pill" id="authState">Демо-профиль</span></div></div>
+ <div class="metrics"><div class="metric"><div class="metric-label">ВНУТРЕННИЕ STARS*</div><div class="metric-value"><span class="star">★</span> <span id="profileStars">0</span></div></div><div class="metric"><div class="metric-label">ПРЕДМЕТЫ</div><div class="metric-value" id="profileItems">0</div></div><div class="metric"><div class="metric-label">ОТКРЫТИЯ</div><div class="metric-value" id="profileOpens">0</div></div></div>
+ <h3 style="margin:20px 0 6px">Аккаунт Telegram</h3><p class="panel-sub">Если страница открыта в Telegram, имя и аватар подставятся автоматически. Доверять этим данным для платежей можно только после серверной проверки initData.</p>
+ <div class="formrow"><button class="btn btn-ghost" onclick="refreshTelegram()">↻ Обновить профиль</button><button class="btn btn-ghost" onclick="showView('inventory')">Открыть инвентарь</button></div>
+ <div class="hint">Без серверной авторизации это только клиентское отображение профиля. Не отправляй Telegram initData в сторонние сервисы и не используй клиентский баланс как доказательство оплаты.</div></div>
+ <div class="section-head"><div><h2>История</h2><p>Действия в текущей сессии</p></div></div><div class="history" id="history"></div>
+</section>
+</main>
+</div>
+<div class="footer">GIFT DAUN · Telegram Web App UI prototype · Не связан с официальной платформой Telegram</div>
+</div>
+<div id="toast" class="toast"></div>
+<script>
+const tg=window.Telegram?.WebApp;
+const state={stars:0,inventory:[],opens:0,freeUsed:false,history:[],user:null};
+const caseData=[
+ {name:'Mystery Box',sub:'Случайный коллекционный предмет',emoji:'🎁',tag:'MYSTERY',tone:'purple'},
+ {name:'Neon Drop',sub:'Неоновая серия предметов',emoji:'🌌',tag:'NEON',tone:'blue'},
+ {name:'Lucky Charm',sub:'Маленький сюрприз',emoji:'🍀',tag:'SPECIAL',tone:'green'}
+];
+const demoItems=[
+ {name:'Мишка',emoji:'🧸',rarity:'COMMON',description:'Демо-предмет'},
+ {name:'Кристалл',emoji:'💎',rarity:'RARE',description:'Демо-предмет'},
+ {name:'Звезда',emoji:'🌟',rarity:'SPECIAL',description:'Демо-предмет'},
+ {name:'Клевер',emoji:'🍀',rarity:'COMMON',description:'Демо-предмет'},
+ {name:'Планета',emoji:'🪐',rarity:'RARE',description:'Демо-предмет'},
+ {name:'Корона',emoji:'👑',rarity:'EPIC',description:'Демо-предмет'}
+];
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function toast(s){const t=document.getElementById('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));document.querySelectorAll('.nav').forEach(v=>v.classList.toggle('active',v.dataset.view===id));if(id==='inventory')renderInventory();window.scrollTo({top:0,behavior:'smooth'})}
+function addHistory(title,detail){state.history.unshift({title,detail,time:new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})});renderHistory()}
+function refreshTelegram(){
+ const u=tg?.initDataUnsafe?.user;
+ if(u){state.user=u;document.getElementById('connectionText').textContent='Telegram Web App';document.getElementById('authState').textContent='Профиль из Telegram';document.getElementById('topName').textContent=[u.first_name,u.last_name].filter(Boolean).join(' ')||'Telegram user';document.getElementById('topHandle').textContent=u.username?'@'+u.username:'Telegram account';document.getElementById('profileName').textContent=[u.first_name,u.last_name].filter(Boolean).join(' ')||'Telegram user';document.getElementById('profileUsername').textContent=u.username?'@'+u.username:'ID: '+u.id;setAvatar('topAvatar',u);setAvatar('bigAvatar',u)}else{document.getElementById('connectionText').textContent='Локальный демо-режим';document.getElementById('authState').textContent='Демо-профиль';}
+}
+function setAvatar(id,u){const el=document.getElementById(id);if(u.photo_url){el.innerHTML='<img alt="" src="'+esc(u.photo_url)+'">'}else{el.textContent=(u.first_name||'G').slice(0,1).toUpperCase()}}
+function openFreeCase(){
+ if(state.freeUsed){toast('Бесплатный кейс уже открыт в этой сессии');return}
+ state.freeUsed=true;state.opens++;
+ const item=demoItems[Math.floor(Math.random()*demoItems.length)];
+ state.inventory.unshift({...item,id:Date.now(),source:'Free Drop',real:false});
+ document.getElementById('freeCaseBtn').disabled=true;document.getElementById('freeCaseBtn').textContent='Кейс уже открыт ✓';
+ addHistory('Открыт Free Drop',item.emoji+' '+item.name);
+ renderAll();toast('Выпало: '+item.name+' · демо-предмет');
+}
+function renderCaseCards(){document.getElementById('caseCards').innerHTML=caseData.map((c,i)=>`<article class="case-card"><div class="case-visual"><span class="gift-emoji">${c.emoji}</span></div><h3>${c.name}</h3><p>${c.sub}</p><div class="case-foot"><span class="tag">${c.tag}</span><button class="btn btn-ghost btn-small" onclick="toast('Платные случайные открытия отключены в этом прототипе')">Подробнее</button></div></article>`).join('')}
+function renderPacks(){const packs=[{stars:50,label:'Starter'},{stars:150,label:'Popular'},{stars:500,label:'Max'}];document.getElementById('starPacks').innerHTML=packs.map(p=>`<article class="case-card"><div class="case-visual" style="height:95px"><span class="gift-emoji" style="font-size:47px">⭐</span></div><h3>${p.label}</h3><p>Пакет внутреннего баланса</p><div class="case-foot"><span class="case-price">★ ${p.stars}</span><button class="btn btn-primary btn-small" onclick="toast('Платежи ещё не подключены к серверу')">Выбрать</button></div></article>`).join('')}
+function renderGiftCatalog(){const gifts=[{name:'Plush Pepe',emoji:'🐸',price:'Проверить цену',desc:'Telegram collectible'},{name:'Durov’s Cap',emoji:'🧢',price:'Проверить цену',desc:'Telegram collectible'},{name:'Vintage Cigar',emoji:'🚬',price:'Проверить цену',desc:'Telegram collectible'}];document.getElementById('giftCatalog').innerHTML=gifts.map(g=>`<article class="gift-card"><div class="gift-image"><span class="gift-badge">CATALOG DEMO</span>${g.emoji}</div><h3>${g.name}</h3><p>${g.desc}</p><div class="gift-meta"><span class="gift-price">${g.price}</span><button class="btn btn-ghost btn-small" onclick="toast('Нужна проверенная актуальная запись подарка с сервера')">Открыть</button></div></article>`).join('')}
+function renderInventory(){const el=document.getElementById('inventoryCards');document.getElementById('inventoryEmpty').style.display=state.inventory.length?'none':'block';document.getElementById('inventoryCount').textContent=state.inventory.length+' ITEMS';el.innerHTML=state.inventory.map(i=>`<article class="gift-card"><div class="gift-image"><span class="gift-badge">${esc(i.rarity)}</span>${i.emoji}</div><h3>${esc(i.name)}</h3><p>${esc(i.description)} · ${esc(i.source||'Collection')}</p><div class="gift-meta"><span class="tag">DEMO ITEM</span></div></article>`).join('')}
+function renderHistory(){const el=document.getElementById('history');el.innerHTML=state.history.length?state.history.slice(0,15).map(h=>`<div class="history-row"><div>${esc(h.title)}<small>${esc(h.time)}</small></div><div class="history-amount">${esc(h.detail)}</div></div>`).join(''):'<div class="empty">Пока нет событий в истории.</div>'}
+function renderAll(){['metricStars','profileStars','starBalance'].forEach(id=>document.getElementById(id).textContent=state.stars);document.getElementById('metricItems').textContent=state.inventory.length+' предметов';document.getElementById('metricFree').textContent=state.freeUsed?'0 доступно':'1 доступен';document.getElementById('profileItems').textContent=state.inventory.length;document.getElementById('profileOpens').textContent=state.opens;renderInventory();renderHistory()}
+tg?.ready?.();tg?.expand?.();tg?.setHeaderColor?.('#090a0f');tg?.setBackgroundColor?.('#090a0f');
+refreshTelegram();renderCaseCards();renderPacks();renderGiftCatalog();renderAll();
+</script>
 </body>
 </html>
