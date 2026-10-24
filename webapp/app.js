@@ -3,10 +3,11 @@ const tg=window.Telegram?.WebApp;
 const $=s=>document.querySelector(s);
 let state=null,page='home';
 const initData=tg?.initData||'';
+const API_BASE=(window.EZZZ_API_BASE||'').replace(/\/$/,'');
 const escapeHTML=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(message){const t=$('#toast');t.textContent=message;t.style.display='block';clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.style.display='none',3500)}
 async function api(action,data={}){
-  const res=await fetch('/api/'+action,{method:'POST',headers:{'Content-Type':'application/json','X-Telegram-Init-Data':initData},body:JSON.stringify(data)});
+  const res=await fetch(API_BASE+'/api/'+action,{method:'POST',headers:{'Content-Type':'application/json','X-Telegram-Init-Data':initData},body:JSON.stringify(data)});
   const out=await res.json().catch(()=>({error:'Нет ответа сервера'}));
   if(!res.ok)throw Error(out.error||'Ошибка запроса');return out;
 }
@@ -16,7 +17,7 @@ function button(label,fn,alt=false){const b=document.createElement('button');b.c
 function link(label,url){const a=document.createElement('a');a.className='btn alt';a.textContent=label;a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a}
 function card(title,body){const d=document.createElement('section');d.className='card';const h=document.createElement('h2');h.textContent=title;d.append(h);if(typeof body==='string')d.insertAdjacentHTML('beforeend',body);else if(body)d.append(body);return d}
 function add(el){$('#content').append(el)}
-function image(name){const img=document.createElement('img');img.className='banner';img.src='/api/image/'+name+'?t='+Date.now();img.alt='EZZZ STARS';img.onerror=()=>img.remove();return img}
+function image(name){const img=document.createElement('img');img.className='banner';img.src=API_BASE+'/api/image/'+name+'?t='+Date.now();img.alt='EZZZ STARS';img.onerror=()=>img.remove();return img}
 function entry(){add(card('🔒 Обязательные подписки','Подпишись на каналы и подтверди участие, чтобы открыть приложение.'));for(const c of state.entry){const box=card(c.chat,`<p class="muted">Награда: +${escapeHTML(c.reward)}⭐</p>`);const a=document.createElement('div');a.className='actions';a.append(link('Открыть канал',c.url),button('✓ Проверить',()=>action('check',{kind:'entry',id:c.id})));box.append(a);add(box)}}
 function home(){const box=card('⭐ Добро пожаловать', 'Выполняй задания, приглашай друзей и собирай звёзды!');box.prepend(image('m.png'));add(box);const a=card('🎁 Бесплатные звёзды',state.free_wait?`До следующей награды: ${Math.ceil(state.free_wait/60)} мин.`:'Получай +0.1⭐ каждый час');a.append(button('Получить +0.1⭐',()=>action('free'),false));add(a);const b=card('🎟 Промокод');const inp=document.createElement('input');inp.placeholder='Введи промокод';inp.maxLength=32;b.append(inp,button('Активировать',()=>action('promo',{code:inp.value})));add(b)}
 function tasks(){const b=card('🎯 Задания','Подписывайся на каналы, затем нажимай «Проверить».');b.prepend(image('q.png'));add(b);if(!state.tasks.length)add(card('Пока нет заданий','Загляни позже — появятся новые.'));for(const c of state.tasks){const el=card(c.chat,`<p class="muted">+${escapeHTML(c.reward)}⭐ за подписку</p>`);const a=document.createElement('div');a.className='actions';a.append(link('Открыть',c.url),button('✓ Проверить',()=>action('check',{kind:'task',id:c.id})));el.append(a);add(el)}const f=card('🧩 Квесты Flowly','Дополнительные задания с наградой за проверку.');f.append(button('Показать квесты',async()=>{try{const r=await api('flowly');showOffers(r.offers)}catch(e){toast(e.message)}}));add(f)}
@@ -28,4 +29,15 @@ async function showTop(category){try{const r=await api('top',{category});$('#con
 function render(){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('#content').replaceChildren();if(state.entry_required){entry();return}({home,tasks,profile,withdraw,more}[page]||home)()}
 function setPage(p){page=p;render()}
 document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>setPage(b.dataset.page)));
-(async()=>{try{tg?.ready();tg?.expand();if(!initData){$('#content').textContent='Открой мини-приложение кнопкой внутри Telegram-бота.';return}await load()}catch(e){$('#content').textContent='Не удалось открыть приложение: '+e.message}})();
+(async()=>{try{tg?.ready();tg?.expand();if(!initData){showLanding();return}await load()}catch(e){$('#content').textContent='Не удалось открыть приложение: '+e.message}})();
+
+function showLanding(){
+  $('#balance').textContent='—';
+  $('#greeting').textContent='Открой приложение в Telegram';
+  const content=$('#content');content.replaceChildren();
+  const welcome=card('✦ Твой центр звёзд', '<p class="muted">Задания, рефералы, бонусы и вывод звёзд — всё в одном месте.</p>');
+  const a=document.createElement('a');a.href='https://t.me/ecipystar_bot';a.className='btn';a.target='_blank';a.rel='noopener noreferrer';a.textContent='🚀 Открыть EZZZ STARS в Telegram';welcome.append(a);content.append(welcome);
+  const info=card('Как это работает?','<div class="feature"><span>🎯</span><div><b>Выполняй задания</b><p class="muted">Получай звёзды за подтверждённые действия</p></div></div><div class="feature"><span>🎁</span><div><b>Бонус каждый час</b><p class="muted">Бесплатные 0.1⭐ по таймеру</p></div></div><div class="feature"><span>👥</span><div><b>Приглашай друзей</b><p class="muted">Реферальные награды по условиям бота</p></div></div><div class="feature"><span>💸</span><div><b>Выводи звёзды</b><p class="muted">Отправляй заявки на вывод через приложение</p></div></div>');content.append(info);
+  const note=card('🔐 Безопасный вход','<p class="muted">Для просмотра реального баланса открой Mini App через кнопку бота в Telegram. На обычной странице GitHub Pages данные аккаунта не доступны.</p>');content.append(note);
+  document.querySelectorAll('nav button').forEach(b=>b.disabled=true);
+}
