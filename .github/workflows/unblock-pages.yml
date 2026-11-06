@@ -1,0 +1,35 @@
+name: Unblock ILLUSION Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  pages: write
+
+jobs:
+  unblock:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel stuck deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          code=$(curl -sS -o /tmp/result.json -w '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/deployments/41f51c93c7f555fe0b6fd936b4d4f21325542a11/cancel")
+          cat /tmp/result.json
+          if [ "$code" != "204" ] && [ "$code" != "404" ]; then
+            echo "Cancellation failed: HTTP $code"
+            exit 1
+          fi
+
+      - name: Start fresh Pages build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/builds"
